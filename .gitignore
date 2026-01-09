@@ -1,0 +1,4 @@
+node_modules/
+hrm-backend-str.ini
+package-lock.json
+.env.local
