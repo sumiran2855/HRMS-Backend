@@ -1,6 +1,6 @@
-import { injectable } from 'inversify';
-import bcrypt from 'bcryptjs';
-import { envConfig } from '../../config/env.config';
+import { injectable } from "inversify";
+import bcrypt from "bcryptjs";
+import { envConfig } from "../../config/env.config";
 
 export interface IPasswordService {
   hashPassword(password: string): Promise<string>;

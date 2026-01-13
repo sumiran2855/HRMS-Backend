@@ -1,7 +1,7 @@
 export class PasswordHasher {
   hash(password: string): string {
     // TODO: Implement hashing
-    return 'hashedPassword';
+    return "hashedPassword";
   }
 
   compare(password: string, hash: string): boolean {

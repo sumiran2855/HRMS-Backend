@@ -1,6 +1,6 @@
-import { injectable } from 'inversify';
-import jwt, { SignOptions } from 'jsonwebtoken';
-import { envConfig } from '../../config/env.config';
+import { injectable } from "inversify";
+import jwt, { SignOptions } from "jsonwebtoken";
+import { envConfig } from "../../config/env.config";
 
 export interface ITokenPayload {
   userId: string;
@@ -10,17 +10,25 @@ export interface ITokenPayload {
 
 export interface IJwtService {
   generateToken(payload: ITokenPayload): string;
+  generateRefreshToken(payload: ITokenPayload): string;
   verifyToken(token: string): ITokenPayload | null;
-  refreshToken(token: string): string | null;
+  verifyRefreshToken(token: string): ITokenPayload | null;
 }
 
 @injectable()
 export class JwtService implements IJwtService {
   generateToken(payload: ITokenPayload): string {
     const options: SignOptions = {
-      expiresIn: parseInt(envConfig.jwtExpiration, 10),
+      expiresIn: envConfig.jwtExpiration, // Already a number (seconds)
     };
     return jwt.sign(payload, envConfig.jwtSecret as string, options);
+  }
+
+  generateRefreshToken(payload: ITokenPayload): string {
+    const options: SignOptions = {
+      expiresIn: envConfig.jwtRefreshExpiration, // Refresh token longer expiration (24h)
+    };
+    return jwt.sign(payload, envConfig.jwtRefreshSecret as string, options);
   }
 
   verifyToken(token: string): ITokenPayload | null {
@@ -32,11 +40,15 @@ export class JwtService implements IJwtService {
     }
   }
 
-  refreshToken(token: string): string | null {
-    const payload = this.verifyToken(token);
-    if (!payload) {
+  verifyRefreshToken(token: string): ITokenPayload | null {
+    try {
+      const decoded = jwt.verify(
+        token,
+        envConfig.jwtRefreshSecret
+      ) as ITokenPayload;
+      return decoded;
+    } catch (error) {
       return null;
     }
-    return this.generateToken(payload);
   }
 }

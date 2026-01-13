@@ -1,5 +1,5 @@
-import { injectable } from 'inversify';
-import { User, IUser } from '../models/user.model';
+import { injectable } from "inversify";
+import { User, IUser } from "../models/user.model";
 
 export interface IUserRepository {
   create(userData: Partial<IUser>): Promise<IUser>;
@@ -18,7 +18,7 @@ export class UserRepository implements IUserRepository {
   }
 
   async findById(id: string): Promise<IUser | null> {
-    return User.findById(id).select('-password') as Promise<IUser | null>;
+    return User.findById(id).select("-password") as Promise<IUser | null>;
   }
 
   async findByEmail(email: string): Promise<IUser | null> {
@@ -30,7 +30,9 @@ export class UserRepository implements IUserRepository {
   }
 
   async update(id: string, userData: Partial<IUser>): Promise<IUser | null> {
-    const result = await User.findByIdAndUpdate(id, userData, { new: true }).select('-password');
+    const result = await User.findByIdAndUpdate(id, userData, {
+      new: true,
+    }).select("-password");
     return result as IUser | null;
   }
 
