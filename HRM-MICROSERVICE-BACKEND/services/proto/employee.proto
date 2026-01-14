@@ -2,12 +2,19 @@ syntax = "proto3";
 
 package employee;
 
+// EmployeeService provides RPC methods for managing employee records
 service EmployeeService {
+  // CreateEmployee creates a new employee record
   rpc CreateEmployee (CreateEmployeeRequest) returns (EmployeeResponse) {}
+  // GetEmployeeById retrieves an employee by their unique identifier
   rpc GetEmployeeById (GetEmployeeByIdRequest) returns (EmployeeResponse) {}
+  // GetAllEmployees retrieves all employees with optional filtering
   rpc GetAllEmployees (GetAllEmployeesRequest) returns (EmployeeListResponse) {}
+  // UpdateEmployee updates an existing employee record
   rpc UpdateEmployee (UpdateEmployeeRequest) returns (EmployeeResponse) {}
+  // DeleteEmployee removes an employee record
   rpc DeleteEmployee (DeleteEmployeeRequest) returns (DeleteEmployeeResponse) {}
+  // GetEmployeeByEmail retrieves an employee by their email address
   rpc GetEmployeeByEmail (GetEmployeeByEmailRequest) returns (EmployeeResponse) {}
 }
 
