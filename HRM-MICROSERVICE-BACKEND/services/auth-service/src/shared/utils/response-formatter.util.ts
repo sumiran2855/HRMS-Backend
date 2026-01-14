@@ -1,7 +1,3 @@
-/**
- * Response Formatter Utility
- * Standardized API response format
- */
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -14,9 +10,6 @@ export interface ApiResponse<T = any> {
 }
 
 export class ResponseFormatter {
-  /**
-   * Format success response
-   */
   static success<T>(
     data: T,
     message: string = "Success",
@@ -31,9 +24,6 @@ export class ResponseFormatter {
     };
   }
 
-  /**
-   * Format error response
-   */
   static error(
     message: string = "Error",
     statusCode: number = 500,
@@ -48,9 +38,6 @@ export class ResponseFormatter {
     };
   }
 
-  /**
-   * Format paginated response
-   */
   static paginated<T>(
     data: T[],
     total: number,

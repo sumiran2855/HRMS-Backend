@@ -1,6 +1,3 @@
-/**
- * HTTP Status Codes
- */
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
@@ -16,9 +13,6 @@ export const HTTP_STATUS = {
   SERVICE_UNAVAILABLE: 503,
 } as const;
 
-/**
- * Error Messages
- */
 export const ERROR_MESSAGES = {
   UNAUTHORIZED: "Unauthorized access",
   FORBIDDEN: "Forbidden",
@@ -31,9 +25,6 @@ export const ERROR_MESSAGES = {
   BAD_REQUEST: "Bad request",
 } as const;
 
-/**
- * Success Messages
- */
 export const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: "Login successful",
   REGISTER_SUCCESS: "Registration successful",

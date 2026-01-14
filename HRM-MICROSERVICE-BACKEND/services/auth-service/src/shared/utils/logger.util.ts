@@ -1,7 +1,3 @@
-/**
- * Logger Utility
- * Centralized logging for the microservice
- */
 export class Logger {
   private context: string;
 
@@ -9,9 +5,6 @@ export class Logger {
     this.context = context;
   }
 
-  /**
-   * Log info level message
-   */
   info(message: string, data?: any): void {
     console.log(
       `[${this.getTimestamp()}] [${this.context}] [INFO] ${message}`,
@@ -19,9 +12,6 @@ export class Logger {
     );
   }
 
-  /**
-   * Log warning level message
-   */
   warn(message: string, data?: any): void {
     console.warn(
       `[${this.getTimestamp()}] [${this.context}] [WARN] ${message}`,
@@ -29,9 +19,6 @@ export class Logger {
     );
   }
 
-  /**
-   * Log error level message
-   */
   error(message: string, error?: any): void {
     console.error(
       `[${this.getTimestamp()}] [${this.context}] [ERROR] ${message}`,
@@ -39,9 +26,6 @@ export class Logger {
     );
   }
 
-  /**
-   * Log debug level message
-   */
   debug(message: string, data?: any): void {
     if (
       process.env.DEBUG === "true" ||
@@ -54,9 +38,6 @@ export class Logger {
     }
   }
 
-  /**
-   * Get current timestamp in ISO format
-   */
   private getTimestamp(): string {
     return new Date().toISOString();
   }

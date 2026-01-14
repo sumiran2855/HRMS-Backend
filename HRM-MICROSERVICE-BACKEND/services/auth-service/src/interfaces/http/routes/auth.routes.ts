@@ -91,6 +91,7 @@ export function registerAuthRoutes(
       }
     }
   );
+  
 
   app.use("/api/auth", router);
 }

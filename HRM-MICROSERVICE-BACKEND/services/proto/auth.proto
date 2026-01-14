@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  rpc Register (RegisterRequest) returns (AuthResponse) {}
+  rpc Login (LoginRequest) returns (AuthResponse) {}
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {}
+  rpc RefreshToken (RefreshTokenRequest) returns (AuthResponse) {}
+  rpc GetCurrentUser (GetCurrentUserRequest) returns (UserResponse) {}
+  rpc VerifyUserExists (VerifyUserExistsRequest) returns (VerifyUserExistsResponse) {}
+}
+
+message RegisterRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+  string fullName = 4;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+message GetCurrentUserRequest {
+  string userId = 1;
+}
+
+message VerifyUserExistsRequest {
+  string email = 1;
+  string username = 2;
+}
+
+message AuthResponse {
+  bool success = 1;
+  string message = 2;
+  AuthData data = 3;
+  string error = 4;
+}
+
+message UserResponse {
+  bool success = 1;
+  string message = 2;
+  UserData data = 3;
+  string error = 4;
+}
+
+message ValidateTokenResponse {
+  bool success = 1;
+  bool isValid = 2;
+  string message = 3;
+  string error = 4;
+  UserData userData = 5;
+}
+
+message VerifyUserExistsResponse {
+  bool success = 1;
+  string message = 2;
+  bool exists = 3;
+  string error = 4;
+}
+
+message AuthData {
+  string userId = 1;
+  string username = 2;
+  string email = 3;
+  string accessToken = 4;
+  string refreshToken = 5;
+  int64 expiresIn = 6;
+}
+
+message UserData {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string fullName = 4;
+  int64 createdAt = 5;
+  int64 updatedAt = 6;
+}

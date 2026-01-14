@@ -3,10 +3,6 @@ import { Logger } from "../shared/utils/logger.util";
 
 const logger = new Logger("DatabaseBootstrap");
 
-/**
- * Database Initialization
- * Establishes connection to MongoDB
- */
 export async function initializeDatabase(): Promise<void> {
   try {
     await connectToDatabase();

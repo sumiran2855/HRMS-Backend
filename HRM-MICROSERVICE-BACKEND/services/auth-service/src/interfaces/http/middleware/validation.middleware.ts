@@ -3,18 +3,11 @@ import { Logger } from "../../../shared/utils/logger.util";
 
 const logger = new Logger("ValidationMiddleware");
 
-/**
- * Validation Error Response
- */
 export interface ValidationErrorResponse {
   field: string;
   message: string;
 }
 
-/**
- * Validate Request Body
- * Generic validation middleware
- */
 export function validateRequestBody(requiredFields: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const errors: ValidationErrorResponse[] = [];
@@ -43,10 +36,6 @@ export function validateRequestBody(requiredFields: string[]) {
   };
 }
 
-/**
- * Sanitize Request Body
- * Removes unwanted fields from request body
- */
 export function sanitizeRequestBody(fieldsToRemove: string[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     fieldsToRemove.forEach((field) => {
@@ -56,10 +45,6 @@ export function sanitizeRequestBody(fieldsToRemove: string[]) {
   };
 }
 
-/**
- * Trim Whitespace
- * Trims whitespace from string fields
- */
 export function trimRequestBody(
   req: Request,
   res: Response,

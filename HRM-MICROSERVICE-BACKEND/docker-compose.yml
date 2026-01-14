@@ -1,0 +1,74 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: hrms-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - hrms-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./services/auth-service/Dockerfile
+    container_name: hrms-auth-service
+    ports:
+      - "3001:3001"      # HTTP API
+      - "5001:5001"      # gRPC
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      GRPC_AUTH_PORT: 5001
+      GRPC_EMPLOYEE_PORT: 5002
+      EMPLOYEE_SERVICE_GRPC_URL: employee-service:5002
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/hrms-auth?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - hrms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Employee Service
+  employee-service:
+    build:
+      context: .
+      dockerfile: ./services/employee-service/Dockerfile
+    container_name: hrms-employee-service
+    ports:
+      - "3002:3002"      # HTTP API
+      - "5002:5002"      # gRPC
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      GRPC_AUTH_PORT: 5001
+      GRPC_EMPLOYEE_PORT: 5002
+      AUTH_SERVICE_GRPC_URL: auth-service:5001
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/hrms-employee?authSource=admin
+    depends_on:
+      - mongodb
+      - auth-service
+    networks:
+      - hrms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mongodb_data:
+
+networks:
+  hrms-network:
+    driver: bridge

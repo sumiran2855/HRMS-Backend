@@ -10,10 +10,6 @@ import {
 const logger = new Logger("AuthMiddleware");
 const jwtService = new JwtService();
 
-/**
- * Authentication Middleware
- * Validates JWT token from Authorization header
- */
 export async function authMiddleware(
   req: Request,
   res: Response,
@@ -26,7 +22,7 @@ export async function authMiddleware(
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7);
 
     const payload = jwtService.verifyToken(token);
 
@@ -51,10 +47,6 @@ export async function authMiddleware(
   }
 }
 
-/**
- * Optional Authentication Middleware
- * Sets user on request if valid token provided, but doesn't fail if missing
- */
 export async function optionalAuthMiddleware(
   req: Request,
   res: Response,
@@ -75,13 +67,10 @@ export async function optionalAuthMiddleware(
     next();
   } catch (error) {
     logger.debug("Optional auth - No valid token provided");
-    next(); // Continue without authentication
+    next();
   }
 }
 
-/**
- * Create authentication middleware with custom JWT service instance
- */
 export function createAuthMiddleware(jwtSvc: JwtService) {
   return async (
     req: Request,

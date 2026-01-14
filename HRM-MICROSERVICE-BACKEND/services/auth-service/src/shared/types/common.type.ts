@@ -1,7 +1,3 @@
-/**
- * Request context type
- * Extended Express Request with additional properties
- */
 export interface AuthenticatedRequest {
   user?: {
     userId: string;
@@ -11,9 +7,6 @@ export interface AuthenticatedRequest {
   id?: string;
 }
 
-/**
- * Token Payload type
- */
 export interface TokenPayload {
   userId: string;
   email: string;
@@ -21,9 +14,6 @@ export interface TokenPayload {
   exp?: number;
 }
 
-/**
- * API Response type
- */
 export interface ApiResponseType<T = any> {
   success: boolean;
   message?: string;

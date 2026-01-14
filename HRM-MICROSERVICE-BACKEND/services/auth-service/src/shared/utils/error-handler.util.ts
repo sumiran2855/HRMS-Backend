@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
 import { Logger } from "./logger.util";
 
-/**
- * Application Error Class
- * Custom error handling for the microservice
- */
 export class AppError extends Error {
   constructor(
     public message: string,
@@ -17,21 +13,12 @@ export class AppError extends Error {
   }
 }
 
-/**
- * Error Handler Utility
- * Centralized error handling for the microservice
- */
 export class ErrorHandler {
-  /**
-   * Handle errors and send appropriate response
-   */
   static handle(error: any, req: Request, res: Response, logger: Logger): void {
     const requestId = (req as any).id;
 
-    // Log the error
     logger.error(`[${requestId}] ${error.message}`, error);
 
-    // Operational errors
     if (error instanceof AppError) {
       res.status(error.statusCode).json({
         success: false,
@@ -42,7 +29,6 @@ export class ErrorHandler {
       return;
     }
 
-    // Validation errors
     if (error.name === "ValidationError") {
       res.status(400).json({
         success: false,
@@ -54,7 +40,6 @@ export class ErrorHandler {
       return;
     }
 
-    // Cast errors (e.g., invalid MongoDB ObjectId)
     if (error.name === "CastError") {
       res.status(400).json({
         success: false,
@@ -65,7 +50,6 @@ export class ErrorHandler {
       return;
     }
 
-    // JWT errors
     if (error.name === "JsonWebTokenError") {
       res.status(401).json({
         success: false,
@@ -86,10 +70,8 @@ export class ErrorHandler {
       return;
     }
 
-    // Unexpected errors
     logger.error(`[${requestId}] Unhandled error:`, error);
 
-    // Don't expose error details in production
     const isDevelopment = process.env.NODE_ENV === "development";
     const message = isDevelopment ? error.message : "Internal server error";
 

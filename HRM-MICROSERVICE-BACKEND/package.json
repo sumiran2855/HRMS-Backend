@@ -5,7 +5,9 @@
   "description": "Root directory for HRMS microservices",
    "scripts": {
     "auth:dev": "cd services/auth-service && npm run dev",
-    "auth:build": "cd services/auth-service && npm run build"
+    "auth:build": "cd services/auth-service && npm run build",
+    "employee:dev": "cd services/employee-service && npm run dev",
+    "employee:build": "cd services/employee-service && npm run build"
   },
   "author": "dev.sandeep",
   "license": "ISC"

@@ -19,14 +19,14 @@ export interface IJwtService {
 export class JwtService implements IJwtService {
   generateToken(payload: ITokenPayload): string {
     const options: SignOptions = {
-      expiresIn: envConfig.jwtExpiration, // Already a number (seconds)
+      expiresIn: envConfig.jwtExpiration,
     };
     return jwt.sign(payload, envConfig.jwtSecret as string, options);
   }
 
   generateRefreshToken(payload: ITokenPayload): string {
     const options: SignOptions = {
-      expiresIn: envConfig.jwtRefreshExpiration, // Refresh token longer expiration (24h)
+      expiresIn: envConfig.jwtRefreshExpiration,
     };
     return jwt.sign(payload, envConfig.jwtRefreshSecret as string, options);
   }

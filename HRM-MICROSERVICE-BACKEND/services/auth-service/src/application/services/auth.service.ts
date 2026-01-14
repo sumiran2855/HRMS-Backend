@@ -30,7 +30,6 @@ export class AuthService implements IAuthService {
     password: string,
     fullName: string
   ): Promise<any> {
-    // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
       throw new Error("User with this email already exists");
@@ -41,7 +40,6 @@ export class AuthService implements IAuthService {
       throw new Error("Username already taken");
     }
 
-    // Create new user
     const user = await this.userRepository.create({
       email,
       username,
@@ -49,7 +47,6 @@ export class AuthService implements IAuthService {
       fullName,
     });
 
-    // Generate tokens
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
@@ -72,24 +69,20 @@ export class AuthService implements IAuthService {
   }
 
   async login(email: string, password: string): Promise<any> {
-    // Find user by email
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new Error("Invalid email or password");
     }
 
-    // Verify password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       throw new Error("Invalid email or password");
     }
 
-    // Check if user is active
     if (!user.isActive) {
       throw new Error("User account is inactive");
     }
 
-    // Generate tokens
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,

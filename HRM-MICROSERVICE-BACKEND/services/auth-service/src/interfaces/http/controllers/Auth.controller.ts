@@ -11,20 +11,12 @@ import {
 } from "../../../shared/constants/messages.constant";
 import { AppError } from "../../../shared/utils/error-handler.util";
 
-/**
- * Auth Controller
- * Handles all authentication-related HTTP requests
- */
 @injectable()
 export class AuthController {
   private logger = new Logger("AuthController");
 
   constructor(@inject("AuthService") private authService: IAuthService) {}
 
-  /**
-   * Register a new user
-   * POST /api/auth/register
-   */
   async register(req: Request, res: Response): Promise<void> {
     const requestId = (req as any).id;
 
@@ -70,10 +62,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Login user
-   * POST /api/auth/login
-   */
   async login(req: Request, res: Response): Promise<void> {
     const requestId = (req as any).id;
 
@@ -110,10 +98,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Validate JWT token
-   * POST /api/auth/validate-token
-   */
   async validateToken(req: Request, res: Response): Promise<void> {
     const requestId = (req as any).id;
 
@@ -155,10 +139,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Get current authenticated user
-   * GET /api/auth/current-user
-   */
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     const requestId = (req as any).id;
 
@@ -205,10 +185,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Logout user
-   * POST /api/auth/logout
-   */
   async logout(req: Request, res: Response): Promise<void> {
     const requestId = (req as any).id;
 
@@ -248,10 +224,6 @@ export class AuthController {
     }
   }
 
-  /**
-   * Refresh JWT token
-   * POST /api/auth/refresh-token
-   */
   async refreshToken(req: Request, res: Response): Promise<void> {
     const requestId = (req as any).id;
 
