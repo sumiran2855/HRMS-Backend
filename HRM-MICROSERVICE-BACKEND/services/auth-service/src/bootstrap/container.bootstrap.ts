@@ -13,7 +13,10 @@ import {
   AuthService,
   IAuthService,
 } from "../application/services/auth.service";
+import { RoleService } from "../application/services/role.service";
 import { AuthController } from "../interfaces/http/controllers/Auth.controller";
+import { AuthGrpcImpl } from "../infrastructure/grpc/auth.grpc.impl";
+import { EmployeeGrpcClient } from "../infrastructure/grpc/employee.grpc.client";
 
 export function buildContainer(): Container {
   const container = new Container();
@@ -34,7 +37,22 @@ export function buildContainer(): Container {
     .to(AuthService)
     .inSingletonScope();
 
+  container
+    .bind<RoleService>(RoleService)
+    .toSelf()
+    .inSingletonScope();
+
   container.bind<AuthController>(AuthController).toSelf();
+
+  container
+    .bind<EmployeeGrpcClient>(EmployeeGrpcClient)
+    .toSelf()
+    .inSingletonScope();
+
+  container
+    .bind<AuthGrpcImpl>(AuthGrpcImpl)
+    .toSelf()
+    .inSingletonScope();
 
   return container;
 }

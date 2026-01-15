@@ -2,14 +2,16 @@ import 'reflect-metadata';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import { Container } from 'inversify';
 import { Logger } from './shared/utils/logger.util';
 import { ErrorHandler } from './shared/utils/error-handler.util';
 import { ResponseFormatter } from './shared/utils/response-formatter.util';
+import { registerEmployeeRoutes } from './interfaces/http/routes/employee.routes';
 import { v4 as uuidv4 } from 'uuid';
 
 const logger = new Logger('App');
 
-export function createApp(): express.Application {
+export function createApp(container?: Container): express.Application {
   const app = express();
 
   app.use(helmet());
@@ -39,6 +41,9 @@ export function createApp(): express.Application {
     res.json({ status: 'READY', service: 'employee-service' });
   });
 
+  if (container) {
+    registerEmployeeRoutes(app, container);
+  }
 
   app.use((req, res) => {
     res.status(404).json(

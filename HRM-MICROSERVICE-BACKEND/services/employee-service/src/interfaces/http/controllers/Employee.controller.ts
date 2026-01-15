@@ -1,10 +1,10 @@
 import { injectable, inject } from 'inversify';
 import { Request, Response } from 'express';
-import { IEmployeeService } from 'src/application/services/employee.service';
-import { ResponseFormatter } from 'src/shared/utils/response-formatter.util';
-import { Logger } from 'src/shared/utils/logger.util';
-import { AppError } from 'src/shared/utils/error-handler.util';
-import { HTTP_STATUS, SUCCESS_MESSAGES, ERROR_MESSAGES } from 'src/shared/constants/messages.constant';
+import { IEmployeeService } from '../../../application/services/employee.service';
+import { ResponseFormatter } from '../../../shared/utils/response-formatter.util';
+import { Logger } from '../../../shared/utils/logger.util';
+import { AppError } from '../../../shared/utils/error-handler.util';
+import { HTTP_STATUS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../../shared/constants/messages.constant';
 
 @injectable()
 export class EmployeeController {

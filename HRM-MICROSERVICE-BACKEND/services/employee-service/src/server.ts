@@ -1,12 +1,14 @@
 import 'reflect-metadata';
 import { createApp } from './app';
 import { initializeDatabase } from './bootstrap/db.bootstrap';
-import { initializeContainer } from './bootstrap/container.bootstrap';
-import { initializeGrpcServer, startGrpcServer, shutdownGrpcServer, loadProtoDefinition } from './bootstrap/grpc.bootstrap';
-import { EmployeeGrpcImpl } from './infrastructure/grpc/employee.grpc';
+import { buildContainer } from './bootstrap/container.bootstrap';
+import { initializeGrpcServer, startGrpcServer, shutdownGrpcServer, loadProtoDefinition, registerService, getGrpcServer } from './bootstrap/grpc.bootstrap';
+import { EmployeeGrpcImpl } from './infrastructure/grpc/employee.grpc.impl';
 import { envConfig } from './config/env.config';
 import { Logger } from './shared/utils/logger.util';
 import path from 'path';
+import { RoleService } from './application/services/role.service';
+import { DEFAULT_ROLES, RoleEnum } from './domain/entities/Role.entity';
 
 const logger = new Logger('Server');
 
@@ -18,11 +20,29 @@ async function bootstrap() {
     await initializeDatabase();
     logger.info('✓ Database connected successfully');
 
-    logger.info("Initializing DI container...");
-    const container = initializeContainer();
+    const container = buildContainer();
     logger.info('✓ DI container initialized');
 
-    const app = createApp();
+    // Initialize default roles
+    const roleService = container.get<RoleService>(RoleService);
+    for (const roleName of Object.values(RoleEnum)) {
+      const roleConfig = DEFAULT_ROLES[roleName as keyof typeof DEFAULT_ROLES];
+      if (roleConfig) {
+        const existingRole = await roleService.getRoleByName(roleConfig.name);
+        if (!existingRole) {
+          await roleService.createRole({
+            name: roleConfig.name,
+            description: roleConfig.description,
+            permissions: roleConfig.permissions,
+            organizationId: "default",
+          });
+          logger.info(`✓ Role ${roleConfig.name} initialized`);
+        }
+      }
+    }
+    logger.info('✓ Default roles ready');
+
+    const app = createApp(container);
 
     const server = app.listen(envConfig.port, () => {
       logger.info(`✓ Server listening on port ${envConfig.port}`);
@@ -31,15 +51,14 @@ async function bootstrap() {
     });
 
     const grpcPort = envConfig.grpcEmployeePort || 5002;
-    const grpcServer = initializeGrpcServer();
+    logger.info(`Initializing gRPC server on port ${grpcPort}...`);
     
-    const employeeGrpcImpl = new EmployeeGrpcImpl(container);
+    initializeGrpcServer();
     
-    const protoPath = path.join(__dirname, '../../proto');
-    const protoFile = path.join(protoPath, '../proto/employee.proto');
-    const proto = loadProtoDefinition(protoPath, protoFile);
+    const employeeGrpcImpl = container.get<EmployeeGrpcImpl>(EmployeeGrpcImpl);
+    const proto = loadProtoDefinition("employee.proto");
     
-    grpcServer.addService((proto as any).employee.EmployeeService.service, {      
+    registerService(getGrpcServer(), proto, "employee.EmployeeService", {      
       createEmployee: (call: any, callback: any) => employeeGrpcImpl.createEmployee(call, callback),
       getEmployeeById: (call: any, callback: any) => employeeGrpcImpl.getEmployeeById(call, callback),
       getAllEmployees: (call: any, callback: any) => employeeGrpcImpl.getAllEmployees(call, callback),
@@ -48,9 +67,8 @@ async function bootstrap() {
       getEmployeeByEmail: (call: any, callback: any) => employeeGrpcImpl.getEmployeeByEmail(call, callback),
     });
     
-    startGrpcServer(grpcServer, grpcPort).catch((error) => {
-      logger.error("Failed to start gRPC server", error);
-    });
+    await startGrpcServer(grpcPort);
+    logger.info(`✓ gRPC server started on port ${grpcPort}`);
 
     const gracefulShutdown = async (signal: string) => {
       logger.info(`\n${signal} received. Starting graceful shutdown...`);
@@ -59,7 +77,7 @@ async function bootstrap() {
         logger.info("HTTP server closed");
 
         try {
-          await shutdownGrpcServer(grpcServer);
+          await shutdownGrpcServer();
           logger.info("All resources cleaned up");
           process.exit(0);
         } catch (error) {

@@ -1,14 +1,16 @@
 import { Container } from "inversify";
-import express, { Router, Request, Response } from "express";
+import express, { Router, Request, Response, NextFunction } from "express";
 import { AuthController } from "../controllers/Auth.controller";
 import {
   authMiddleware,
-  optionalAuthMiddleware,
 } from "../middleware/auth.middleware";
 import {
   validateRequestBody,
   trimRequestBody,
 } from "../middleware/validation.middleware";
+import { Logger } from "../../../shared/utils/logger.util";
+
+const logger = new Logger("AuthRoutes");
 
 export function registerAuthRoutes(
   app: express.Application,
@@ -16,13 +18,14 @@ export function registerAuthRoutes(
 ): void {
   const router = Router();
 
+  // Public endpoints - No authentication required
   router.post(
     "/register",
     trimRequestBody,
-    validateRequestBody(["email", "username", "password", "fullName"]),
-    async (req: Request, res: Response, next) => {
+    validateRequestBody(["email", "username", "password", "fullName","role"]),
+    async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const authController = container.get(AuthController);
+        const authController = container.get<AuthController>(AuthController);
         await authController.register(req, res);
       } catch (error) {
         next(error);
@@ -34,9 +37,9 @@ export function registerAuthRoutes(
     "/login",
     trimRequestBody,
     validateRequestBody(["email", "password"]),
-    async (req: Request, res: Response, next) => {
+    async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const authController = container.get(AuthController);
+        const authController = container.get<AuthController>(AuthController);
         await authController.login(req, res);
       } catch (error) {
         next(error);
@@ -44,21 +47,42 @@ export function registerAuthRoutes(
     }
   );
 
-  router.post("/validate-token", async (req: Request, res: Response, next) => {
-    try {
-      const authController = container.get(AuthController);
-      await authController.validateToken(req, res);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  router.get(
-    "/current-user",
-    authMiddleware,
-    async (req: Request, res: Response, next) => {
+  router.post(
+    "/refresh-token",
+    trimRequestBody,
+    validateRequestBody(["refreshToken"]),
+    async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const authController = container.get(AuthController);
+        const authController = container.get<AuthController>(AuthController);
+        await authController.refreshToken(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  // Protected endpoints - Authentication required
+  router.post(
+    "/validate-token",
+    (req: Request, res: Response, next: NextFunction) =>
+      authMiddleware(req, res, next),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const authController = container.get<AuthController>(AuthController);
+        await authController.validateToken(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
+
+  router.post(
+    "/current-user",
+    (req: Request, res: Response, next: NextFunction) =>
+      authMiddleware(req, res, next),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const authController = container.get<AuthController>(AuthController);
         await authController.getCurrentUser(req, res);
       } catch (error) {
         next(error);
@@ -68,10 +92,11 @@ export function registerAuthRoutes(
 
   router.post(
     "/logout",
-    authMiddleware,
-    async (req: Request, res: Response, next) => {
+    (req: Request, res: Response, next: NextFunction) =>
+      authMiddleware(req, res, next),
+    async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const authController = container.get(AuthController);
+        const authController = container.get<AuthController>(AuthController);
         await authController.logout(req, res);
       } catch (error) {
         next(error);
@@ -79,19 +104,6 @@ export function registerAuthRoutes(
     }
   );
 
-  router.post(
-    "/refresh-token",
-    optionalAuthMiddleware,
-    async (req: Request, res: Response, next) => {
-      try {
-        const authController = container.get(AuthController);
-        await authController.refreshToken(req, res);
-      } catch (error) {
-        next(error);
-      }
-    }
-  );
-  
-
-  app.use("/api/auth", router);
+  app.use("/auth", router);
+  logger.info("✓ Auth routes registered successfully");
 }

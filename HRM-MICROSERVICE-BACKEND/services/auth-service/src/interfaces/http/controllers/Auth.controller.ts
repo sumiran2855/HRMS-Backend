@@ -26,14 +26,15 @@ export class AuthController {
         username: req.body.username,
       });
 
-      const { email, username, password, fullName } =
+      const { email, username, password, fullName, role } =
         req.body as RegisterRequest;
 
       const result = await this.authService.register(
         email,
         username,
         password,
-        fullName
+        fullName,
+        role
       );
 
       this.logger.info(`[${requestId}] User registered successfully: ${email}`);

@@ -8,6 +8,7 @@ export class RegisterRequest {
   username!: string;
   password!: string;
   fullName!: string;
+  role!: string;
 }
 
 export class LoginResponse {

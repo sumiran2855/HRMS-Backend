@@ -15,9 +15,9 @@ export class EmployeeGrpcClient {
 
   async initialize(): Promise<void> {
     try {
-      const protoPath = path.join(__dirname, '../../../proto');
+      const protoPath = path.join(__dirname, '../../../../proto', 'employee.proto');
       const packageDefinition = protoLoader.loadSync(
-        path.join(protoPath, 'employee.proto'),
+        protoPath,
         {
           keepCase: true,
           longs: String,

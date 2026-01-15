@@ -5,8 +5,5 @@
     "outDir": "dist"
   },
   "include": ["src"],
-  "paths": {
-     "@modules/*": ["modules/*"],
-      "@container/*": ["container/*"]
-  }
+  "exclude": ["node_modules", "dist"]
 }

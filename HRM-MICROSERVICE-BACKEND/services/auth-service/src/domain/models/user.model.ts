@@ -1,10 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { RoleEnum } from "../entities/Role.entity";
 
 export interface IUser extends Document {
   email: string;
   username: string;
   password: string;
   fullName: string;
+  role: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -35,6 +37,12 @@ const UserSchema = new Schema<IUser>(
       type: String,
       required: true,
       trim: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(RoleEnum),
+      default: RoleEnum.EMPLOYEE,
+      required: true,
     },
     isActive: {
       type: Boolean,

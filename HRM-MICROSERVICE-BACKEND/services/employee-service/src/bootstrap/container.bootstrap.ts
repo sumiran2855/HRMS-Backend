@@ -4,8 +4,11 @@ import { EmployeeRepository } from "../infrastructure/persistence/Employee.repos
 import { IEmployeeRepository } from "../domain/repositories/employee.repository";
 import { EmployeeService } from "../application/services/employee.service.impl";
 import { IEmployeeService } from "../application/services/employee.service";
+import { RoleService } from "../application/services/role.service";
+import { EmployeeGrpcImpl } from "../infrastructure/grpc/employee.grpc.impl";
+import { EmployeeController } from "../interfaces/http/controllers/Employee.controller";
 
-export function initializeContainer(): Container {
+export function buildContainer(): Container {
   const container = new Container();
 
   container
@@ -23,5 +26,22 @@ export function initializeContainer(): Container {
     .to(EmployeeService)
     .inSingletonScope();
 
+  container
+    .bind<RoleService>(RoleService)
+    .toSelf()
+    .inSingletonScope();
+
+  container
+    .bind<EmployeeGrpcImpl>(EmployeeGrpcImpl)
+    .toSelf()
+    .inSingletonScope();
+
+  container
+    .bind<EmployeeController>(EmployeeController)
+    .toSelf()
+    .inTransientScope();
+
   return container;
 }
+
+export const initializeContainer = buildContainer;
