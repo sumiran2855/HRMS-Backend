@@ -7,7 +7,6 @@ import { PermissionEnum } from '../../../domain/entities/Role.entity';
 export function registerEmployeeRoutes(app: express.Application, container: Container): void {
   const router = Router();
 
-  // Create Employee - Requires create:employee permission
   router.post('/', (req: AuthRequest, res: Response, next: NextFunction) => authMiddleware(req, res, next), 
     requirePermission(PermissionEnum.CREATE_EMPLOYEE),
     async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -20,7 +19,6 @@ export function registerEmployeeRoutes(app: express.Application, container: Cont
     }
   );
 
-  // Get All Employees - Requires read:employee permission
   router.get('/', (req: AuthRequest, res: Response, next: NextFunction) => authMiddleware(req, res, next),
     requirePermission(PermissionEnum.READ_EMPLOYEE),
     async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -33,7 +31,6 @@ export function registerEmployeeRoutes(app: express.Application, container: Cont
     }
   );
 
-  // Get Employee by ID - Requires read:employee permission
   router.get('/:id', (req: AuthRequest, res: Response, next: NextFunction) => authMiddleware(req, res, next),
     requirePermission(PermissionEnum.READ_EMPLOYEE),
     async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -46,7 +43,6 @@ export function registerEmployeeRoutes(app: express.Application, container: Cont
     }
   );
 
-  // Update Employee - Requires update:employee permission
   router.put('/:id', (req: AuthRequest, res: Response, next: NextFunction) => authMiddleware(req, res, next),
     requirePermission(PermissionEnum.UPDATE_EMPLOYEE),
     async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -59,7 +55,6 @@ export function registerEmployeeRoutes(app: express.Application, container: Cont
     }
   );
 
-  // Delete Employee - Requires delete:employee permission
   router.delete('/:id', (req: AuthRequest, res: Response, next: NextFunction) => authMiddleware(req, res, next),
     requirePermission(PermissionEnum.DELETE_EMPLOYEE),
     async (req: AuthRequest, res: Response, next: NextFunction) => {

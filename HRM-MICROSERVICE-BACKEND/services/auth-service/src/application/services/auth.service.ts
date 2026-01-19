@@ -45,7 +45,6 @@ export class AuthService implements IAuthService {
       throw new Error("Username already taken");
     }
 
-    // Validate role exists
     const userRole = await this.roleService.getRoleByName(role);
     if (!userRole) {
       throw new Error(`Invalid role: ${role}`);
@@ -100,7 +99,6 @@ export class AuthService implements IAuthService {
       throw new Error("User account is inactive");
     }
 
-    // Get user role and permissions
     const userRole = await this.roleService.getRoleByName(user.role || RoleEnum.EMPLOYEE);
     if (!userRole) {
       throw new Error("User role not found");

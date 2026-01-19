@@ -28,9 +28,7 @@ export class AttendanceService {
     private attendanceRepository: IAttendanceRepository
   ) {}
 
-  /**
-   * Create new attendance record
-   */
+  
   async createAttendance(
     attendance: IAttendanceInput
   ): Promise<IAttendance> {
@@ -50,9 +48,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Get attendance record by ID
-   */
+  
   async getAttendanceById(
     id: string,
     organizationId: string
@@ -78,9 +74,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Get attendance for employee on specific date
-   */
+  
   async getAttendanceByEmployeeDate(
     employeeId: string,
     organizationId: string,
@@ -98,9 +92,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Update attendance record
-   */
+  
   async updateAttendance(
     id: string,
     organizationId: string,
@@ -130,9 +122,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Delete attendance record
-   */
+  
   async deleteAttendance(
     id: string,
     organizationId: string
@@ -160,9 +150,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Get attendance records with filters
-   */
+  
   async getAttendanceByFilters(
     filters: IAttendanceFilter
   ): Promise<IAttendance[]> {
@@ -175,9 +163,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Get attendance for date range
-   */
+  
   async getAttendanceByDateRange(
     organizationId: string,
     startDate: Date,
@@ -212,9 +198,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Get attendance summary for employee
-   */
+  
   async getAttendanceSummary(
     employeeId: string,
     organizationId: string,
@@ -241,9 +225,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Bulk upsert attendance records
-   */
+  
   async bulkUpsertAttendance(
     attendances: IAttendanceInput[],
     organizationId: string
@@ -272,9 +254,7 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Approve attendance record
-   */
+  
   async approveAttendance(
     id: string,
     organizationId: string,
@@ -307,24 +287,20 @@ export class AttendanceService {
     }
   }
 
-  /**
-   * Calculate working hours
-   */
+  
   calculateWorkingHours(checkInTime: Date, checkOutTime: Date): number {
     const diff = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
     return Math.round(diff * 100) / 100; // Round to 2 decimal places
   }
 
-  /**
-   * Determine attendance status based on check-in time
-   */
+  
   determineAttendanceStatus(checkInTime?: Date): "present" | "late" | "absent" {
     if (!checkInTime) return "absent";
 
     const hour = checkInTime.getHours();
     const minute = checkInTime.getMinutes();
 
-    // Assuming office starts at 9:00 AM, late if after 9:30 AM
+
     if (hour > 9 || (hour === 9 && minute > 30)) {
       return "late";
     }
@@ -332,9 +308,7 @@ export class AttendanceService {
     return "present";
   }
 
-  /**
-   * Get pending approvals
-   */
+  
   async getPendingApprovals(
     organizationId: string,
     page: number = 1,

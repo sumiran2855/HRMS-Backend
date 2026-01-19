@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-// import { Logger } from "../utils/logger.util";
+
 import { Logger } from "../shared/utils/logger.util";
 
 const logger = new Logger("DatabaseBootstrap");
@@ -18,7 +18,7 @@ export async function initializeDatabase(): Promise<void> {
 
     logger.info("✓ MongoDB connected successfully");
 
-    // Connection event listeners
+
     mongoose.connection.on("error", (error) => {
       logger.error("MongoDB connection error", error);
     });

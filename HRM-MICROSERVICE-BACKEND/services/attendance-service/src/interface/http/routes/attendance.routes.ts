@@ -19,74 +19,74 @@ const ensureTenantContext: RequestHandler = (req: any, res: Response, next: Next
   next();
 };
 
-// Apply auth middleware globally to all routes
+
 router.use(authMiddleware as RequestHandler);
 router.use(ensureTenantContext);
 
-// Create Attendance - Requires create:attendance permission
+
 router.post(
   "/",
   requirePermission(PermissionEnum.CREATE_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.createAttendance(req, res)
 );
 
-// Get Attendance by ID - Requires read:attendance permission
+
 router.get(
   "/:id",
   requirePermission(PermissionEnum.READ_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.getAttendanceById(req, res)
 );
 
-// Get Attendance by Employee Date - Requires read:attendance permission
+
 router.get(
   "/employee/date",
   requirePermission(PermissionEnum.READ_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.getAttendanceByEmployeeDate(req, res)
 );
 
-// Update Attendance - Requires update:attendance permission
+
 router.put(
   "/:id",
   requirePermission(PermissionEnum.UPDATE_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.updateAttendance(req, res)
 );
 
-// Delete Attendance - Requires delete:attendance permission
+
 router.delete(
   "/:id",
   requirePermission(PermissionEnum.DELETE_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.deleteAttendance(req, res)
 );
 
-// Approve Attendance - Requires approve:attendance permission
+
 router.post(
   "/:id/approve",
   requirePermission(PermissionEnum.APPROVE_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.approveAttendance(req, res)
 );
 
-// Get Attendance by Date Range - Requires read:attendance permission
+
 router.get(
   "/range/query",
   requirePermission(PermissionEnum.READ_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.getAttendanceByDateRange(req, res)
 );
 
-// Get Attendance Summary - Requires view:reports permission
+
 router.get(
   "/summary/stats",
   requirePermission(PermissionEnum.VIEW_REPORTS) as RequestHandler,
   (req: any, res: Response) => attendanceController.getAttendanceSummary(req, res)
 );
 
-// Get Pending Approvals - Requires approve:attendance permission
+
 router.get(
   "/pending/approvals",
   requirePermission(PermissionEnum.APPROVE_ATTENDANCE) as RequestHandler,
   (req: any, res: Response) => attendanceController.getPendingApprovals(req, res)
 );
 
-// Bulk Upsert Attendance - Requires create:attendance and update:attendance permissions
+
 router.post(
   "/bulk/upsert",
   requirePermission(PermissionEnum.CREATE_ATTENDANCE, PermissionEnum.UPDATE_ATTENDANCE) as RequestHandler,

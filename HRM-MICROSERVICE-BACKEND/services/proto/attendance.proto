@@ -14,7 +14,7 @@ service AttendanceService {
   rpc GetPendingApprovals(GetPendingApprovalsRequest) returns (AttendanceListResponse) {}
 }
 
-// Enums
+
 enum AttendanceStatus {
   PRESENT = 0;
   ABSENT = 1;
@@ -32,7 +32,7 @@ enum LeaveType {
   OTHER = 5;
 }
 
-// Messages
+
 message AttendanceData {
   string id = 1;
   string employeeId = 2;

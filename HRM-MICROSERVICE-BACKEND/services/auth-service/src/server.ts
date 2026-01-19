@@ -23,7 +23,6 @@ async function bootstrap(): Promise<void> {
     const container = buildContainer();
     logger.info("✓ Dependency injection container built");
 
-    // Initialize default roles
     logger.info("Initializing default roles...");
     const roleService = container.get<RoleService>(RoleService);
     await initializeDefaultRoles(roleService);

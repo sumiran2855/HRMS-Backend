@@ -23,7 +23,6 @@ async function bootstrap() {
     const container = buildContainer();
     logger.info('✓ DI container initialized');
 
-    // Initialize default roles
     const roleService = container.get<RoleService>(RoleService);
     for (const roleName of Object.values(RoleEnum)) {
       const roleConfig = DEFAULT_ROLES[roleName as keyof typeof DEFAULT_ROLES];

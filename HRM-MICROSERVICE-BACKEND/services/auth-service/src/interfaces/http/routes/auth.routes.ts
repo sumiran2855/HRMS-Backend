@@ -18,7 +18,6 @@ export function registerAuthRoutes(
 ): void {
   const router = Router();
 
-  // Public endpoints - No authentication required
   router.post(
     "/register",
     trimRequestBody,
@@ -61,7 +60,6 @@ export function registerAuthRoutes(
     }
   );
 
-  // Protected endpoints - Authentication required
   router.post(
     "/validate-token",
     (req: Request, res: Response, next: NextFunction) =>

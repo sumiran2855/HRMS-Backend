@@ -77,13 +77,13 @@ const AttendanceSchema = new Schema<IAttendance>(
   }
 );
 
-// Compound index for unique attendance per employee per date per organization
+
 AttendanceSchema.index({ organizationId: 1, employeeId: 1, date: 1 });
 
-// Index for date range queries
+
 AttendanceSchema.index({ organizationId: 1, date: -1 });
 
-// Index for approval queries
+
 AttendanceSchema.index({ organizationId: 1, isApproved: 1 });
 
 export const AttendanceModel = mongoose.model<IAttendance>(

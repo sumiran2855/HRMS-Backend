@@ -63,7 +63,6 @@ export class JwtService implements IJwtService {
         algorithms: ['HS256'],
       }) as ITokenPayload & { iat: number; exp: number };
       
-      // Additional validation
       if (!decoded.userId || !decoded.email) {
         console.error('[JwtService] Invalid token payload: missing userId or email');
         return null;

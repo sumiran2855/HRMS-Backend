@@ -4,10 +4,6 @@ import { DEFAULT_ROLES, RoleEnum } from "../domain/entities/Role.entity";
 
 const logger = new Logger("RoleInitializer");
 
-/**
- * Initialize default roles on application startup
- * Creates SuperAdmin, Admin, HR, Manager, and Employee roles if they don't exist
- */
 export async function initializeDefaultRoles(roleService: RoleService): Promise<void> {
   try {
     logger.info("Starting default roles initialization...");
@@ -20,7 +16,6 @@ export async function initializeDefaultRoles(roleService: RoleService): Promise<
         continue;
       }
 
-      // Check if role already exists
       const existingRole = await roleService.getRoleByName(roleConfig.name);
       
       if (existingRole) {
@@ -28,7 +23,6 @@ export async function initializeDefaultRoles(roleService: RoleService): Promise<
         continue;
       }
 
-      // Create the role
       const newRole = await roleService.createRole({
         name: roleConfig.name,
         description: roleConfig.description,

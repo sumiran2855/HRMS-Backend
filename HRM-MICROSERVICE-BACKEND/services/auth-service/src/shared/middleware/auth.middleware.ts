@@ -15,17 +15,12 @@ export interface AuthRequest extends Request {
   token?: string;
 }
 
-/**
- * Middleware to validate JWT token and extract user information
- * Verifies token signature, expiration, and required claims
- */
 export const authMiddleware = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ): void => {
   try {
-    // Extract token from Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       logger.warn("[AuthMiddleware] Missing or invalid Authorization header");
@@ -37,10 +32,8 @@ export const authMiddleware = (
       return;
     }
 
-    const token = authHeader.substring(7); // Remove "Bearer " prefix
+    const token = authHeader.substring(7);
     const secret = process.env.JWT_SECRET || "your-secret-key";
-
-    // Verify token signature and expiration
     let decoded: any;
     try {
       decoded = jwt.verify(token, secret, {
@@ -61,7 +54,6 @@ export const authMiddleware = (
       return;
     }
 
-    // Validate required token claims
     if (
       !decoded.userId ||
       !decoded.email ||
@@ -80,7 +72,6 @@ export const authMiddleware = (
       return;
     }
 
-    // Store user info and token in request
     req.user = {
       userId: decoded.userId,
       email: decoded.email,
@@ -102,10 +93,6 @@ export const authMiddleware = (
   }
 };
 
-/**
- * Middleware factory to check if user has specific role(s)
- * Returns 403 if user's role is not in the allowed roles list
- */
 export const requireRole = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
@@ -145,10 +132,6 @@ export const requireRole = (...roles: string[]) => {
   };
 };
 
-/**
- * Middleware factory to check if user has specific permission(s)
- * Returns 403 if user doesn't have all required permissions
- */
 export const requirePermission = (...permissions: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
@@ -196,10 +179,6 @@ export const requirePermission = (...permissions: string[]) => {
   };
 };
 
-/**
- * Middleware to optionally verify token without failing if missing
- * Useful for public endpoints that can also accept authenticated users
- */
 export const optionalAuth = (
   req: AuthRequest,
   res: Response,
@@ -208,7 +187,6 @@ export const optionalAuth = (
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      // No token provided - continue without user
       next();
       return;
     }
@@ -236,7 +214,6 @@ export const optionalAuth = (
 
     next();
   } catch (error: any) {
-    // Invalid token - continue without user
     logger.debug("[optionalAuth] Token validation failed, continuing without auth");
     next();
   }
