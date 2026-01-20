@@ -191,6 +191,7 @@ export class AuthController {
 
     try {
       const userId = (req as any).user?.userId;
+      const token = req.headers.authorization?.split(" ")[1];
 
       if (!userId) {
         throw new AppError(
@@ -199,7 +200,16 @@ export class AuthController {
         );
       }
 
-      this.logger.info(`[${requestId}] User logged out: ${userId}`);
+      if (!token) {
+        throw new AppError(
+          "Token is required",
+          HTTP_STATUS.BAD_REQUEST
+        );
+      }
+
+      await this.authService.logout(token, userId);
+
+      this.logger.info(`[${requestId}] User logged out successfully: ${userId}`);
 
       res
         .status(HTTP_STATUS.OK)

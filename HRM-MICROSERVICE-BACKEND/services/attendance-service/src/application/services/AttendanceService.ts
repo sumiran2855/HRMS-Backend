@@ -7,6 +7,7 @@ import {
   IAttendanceSummary,
 } from "../../domain/entities/Attendance.entity";
 import { Logger } from "../../shared/utils/logger.util";
+import { EmployeeGrpcClient } from "../../infrastructure/grpc/employee.grpc.client";
 
 class ApplicationError extends Error {
   constructor(
@@ -25,7 +26,9 @@ export class AttendanceService {
 
   constructor(
     @inject("AttendanceRepository")
-    private attendanceRepository: IAttendanceRepository
+    private attendanceRepository: IAttendanceRepository,
+    @inject(EmployeeGrpcClient)
+    private employeeGrpcClient: EmployeeGrpcClient
   ) {}
 
   
@@ -38,10 +41,15 @@ export class AttendanceService {
         {
           organizationId: attendance.organizationId,
           date: attendance.date,
+          status: attendance.status,
         }
       );
 
-      return await this.attendanceRepository.create(attendance);
+      await this.validateEmployeeExists(attendance.employeeId);
+
+      const processedAttendance = this.processAttendanceData(attendance);
+
+      return await this.attendanceRepository.create(processedAttendance);
     } catch (error) {
       this.logger.error("Error creating attendance", error);
       throw error;
@@ -92,19 +100,63 @@ export class AttendanceService {
     }
   }
 
-  
+  private async validateEmployeeExists(employeeId: string): Promise<void> {
+    try {
+      await this.employeeGrpcClient.initialize();
+
+      const employee = await this.employeeGrpcClient.getEmployeeById(employeeId);
+
+      if (!employee) {
+        throw new ApplicationError(
+          `Employee with ID ${employeeId} does not exist`,
+          404,
+          "EMPLOYEE_NOT_FOUND"
+        );
+      }
+
+      this.logger.info(`✓ Employee ${employeeId} validated successfully`);
+    } catch (error: any) {
+      if (error instanceof ApplicationError) {
+        throw error;
+      }
+
+      if (error.code === 5 || error.message?.includes("not found") || error.message?.includes("does not exist")) {
+        throw new ApplicationError(
+          `Employee with ID ${employeeId} does not exist`,
+          404,
+          "EMPLOYEE_NOT_FOUND"
+        );
+      }
+
+      this.logger.error(
+        `Error validating employee ${employeeId}:`,
+        error.message || error
+      );
+      throw error;
+    }
+  }
+
   async updateAttendance(
     id: string,
     organizationId: string,
     updateData: Partial<IAttendanceInput>
   ): Promise<IAttendance> {
     try {
-      this.logger.info(`Updating attendance ${id}`, { organizationId });
+      this.logger.info(`Updating attendance ${id}`, {
+        organizationId,
+        status: updateData.status,
+      });
+
+      if (updateData.employeeId) {
+        await this.validateEmployeeExists(updateData.employeeId);
+      }
+
+      const processedData = this.processAttendanceUpdate(updateData);
 
       const updated = await this.attendanceRepository.update(
         id,
         organizationId,
-        updateData
+        processedData
       );
 
       if (!updated) {
@@ -244,8 +296,19 @@ export class AttendanceService {
         { organizationId }
       );
 
+      // Validate all employees exist before processing
+      const employeeIds = [...new Set(attendances.map(a => a.employeeId))];
+      for (const employeeId of employeeIds) {
+        await this.validateEmployeeExists(employeeId);
+      }
+
+      // Process each attendance record based on its status
+      const processedAttendances = attendances.map((attendance) =>
+        this.processAttendanceData(attendance)
+      );
+
       return await this.attendanceRepository.bulkUpsert(
-        attendances,
+        processedAttendances,
         organizationId
       );
     } catch (error) {
@@ -288,19 +351,182 @@ export class AttendanceService {
   }
 
   
+  /**
+   * Process attendance update data based on status
+   * Ensures consistency when updating attendance records
+   */
+  private processAttendanceUpdate(
+    updateData: Partial<IAttendanceInput>
+  ): Partial<IAttendanceInput> {
+    // If status is not being updated, return as-is
+    if (!updateData.status) {
+      return updateData;
+    }
+
+    const processed = { ...updateData };
+
+    switch (updateData.status) {
+      case "leave":
+        // For leave: clear check-in/out times and working hours
+        processed.checkInTime = undefined;
+        processed.checkOutTime = undefined;
+        processed.workHours = 0;
+        processed.overtime = 0;
+        break;
+
+      case "absent":
+        // For absent: clear check-in/out times
+        processed.checkInTime = undefined;
+        processed.checkOutTime = undefined;
+        processed.workHours = 0;
+        processed.overtime = 0;
+        break;
+
+      case "half-day":
+        // For half-day: recalculate if times are provided
+        if (processed.checkInTime && processed.checkOutTime) {
+          const workHours = this.calculateWorkingHours(
+            processed.checkInTime,
+            processed.checkOutTime
+          );
+          processed.workHours = Math.min(workHours, 4);
+          processed.overtime = 0;
+        } else {
+          processed.workHours = 0;
+          processed.overtime = 0;
+        }
+        break;
+
+      case "present":
+      case "late":
+        // For present/late: recalculate if times are provided
+        if (processed.checkInTime && processed.checkOutTime) {
+          const workHours = this.calculateWorkingHours(
+            processed.checkInTime,
+            processed.checkOutTime
+          );
+          processed.workHours = workHours;
+          processed.overtime =
+            workHours > 8 ? Math.round((workHours - 8) * 100) / 100 : 0;
+        }
+        break;
+    }
+
+    return processed;
+  }
+
+  /**
+   * Process attendance data based on status
+   * Handles special cases like leave, half-day, and absent
+   */
+  private processAttendanceData(
+    attendance: IAttendanceInput
+  ): IAttendanceInput {
+    const processed = { ...attendance };
+
+    switch (attendance.status) {
+      case "leave":
+        // For leave: clear check-in/out times and working hours
+        processed.checkInTime = undefined;
+        processed.checkOutTime = undefined;
+        processed.workHours = 0;
+        processed.overtime = 0;
+        this.logger.info(
+          `Leave record processed for employee ${attendance.employeeId}, type: ${attendance.leaveType}`
+        );
+        break;
+
+      case "absent":
+        // For absent: clear check-in/out times
+        processed.checkInTime = undefined;
+        processed.checkOutTime = undefined;
+        processed.workHours = 0;
+        processed.overtime = 0;
+        this.logger.info(
+          `Absent record processed for employee ${attendance.employeeId}`
+        );
+        break;
+
+      case "half-day":
+        // For half-day: calculate working hours if both times provided, max 4 hours
+        if (processed.checkInTime && processed.checkOutTime) {
+          const workHours = this.calculateWorkingHours(
+            processed.checkInTime,
+            processed.checkOutTime
+          );
+          // Half-day should typically be around 4 hours
+          processed.workHours = Math.min(workHours, 4);
+          processed.overtime = 0;
+          this.logger.info(
+            `Half-day record processed for employee ${attendance.employeeId}, work hours: ${processed.workHours}`
+          );
+        } else {
+          // If times not provided, default to 0
+          processed.workHours = 0;
+          processed.overtime = 0;
+        }
+        break;
+
+      case "present":
+      case "late":
+        // For present/late: calculate working hours and overtime if both times provided
+        if (processed.checkInTime && processed.checkOutTime) {
+          const workHours = this.calculateWorkingHours(
+            processed.checkInTime,
+            processed.checkOutTime
+          );
+          processed.workHours = workHours;
+
+          // Calculate overtime (anything over 8 hours)
+          const standardWorkHours = 8;
+          processed.overtime =
+            workHours > standardWorkHours
+              ? Math.round((workHours - standardWorkHours) * 100) / 100
+              : 0;
+
+          this.logger.info(
+            `Work record processed for employee ${attendance.employeeId}, work hours: ${processed.workHours}, overtime: ${processed.overtime}`
+          );
+        } else {
+          // If times not provided, default to 0
+          processed.workHours = processed.workHours || 0;
+          processed.overtime = 0;
+        }
+        break;
+
+      default:
+        // Default: keep as is but ensure no overflow
+        if (processed.checkInTime && processed.checkOutTime) {
+          const workHours = this.calculateWorkingHours(
+            processed.checkInTime,
+            processed.checkOutTime
+          );
+          processed.workHours = workHours;
+          processed.overtime =
+            workHours > 8 ? Math.round((workHours - 8) * 100) / 100 : 0;
+        }
+    }
+    return processed;
+  }
+
+  /**
+   * Calculate working hours between check-in and check-out time
+   */
   calculateWorkingHours(checkInTime: Date, checkOutTime: Date): number {
     const diff = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
     return Math.round(diff * 100) / 100; // Round to 2 decimal places
   }
 
-  
+  /**
+   * Determine attendance status based on check-in time
+   */
   determineAttendanceStatus(checkInTime?: Date): "present" | "late" | "absent" {
     if (!checkInTime) return "absent";
 
     const hour = checkInTime.getHours();
     const minute = checkInTime.getMinutes();
 
-
+    // If check-in is after 9:30 AM, mark as late
     if (hour > 9 || (hour === 9 && minute > 30)) {
       return "late";
     }
@@ -308,7 +534,9 @@ export class AttendanceService {
     return "present";
   }
 
-  
+  /**
+   * Get pending approvals for attendance
+   */
   async getPendingApprovals(
     organizationId: string,
     page: number = 1,

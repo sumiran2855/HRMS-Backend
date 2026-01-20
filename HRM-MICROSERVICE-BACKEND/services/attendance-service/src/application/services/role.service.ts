@@ -1,110 +1,90 @@
-import { injectable } from "inversify";
+import { injectable, inject } from "inversify";
 import { Logger } from "../../shared/utils/logger.util";
-import { IRole, IRoleInput, DEFAULT_ROLES, RoleEnum } from "../../domain/entities/Role.entity";
+import { IRole, IRoleInput } from "../../domain/entities/Role.entity";
+import { IRoleRepository } from "../../domain/repositories/role.repository";
+import { AuthGrpcClient } from "../../infrastructure/grpc/auth.grpc.client";
 
 @injectable()
 export class RoleService {
   private logger = new Logger("RoleService");
-  private roles: Map<string, IRole> = new Map();
+  private roleCache: Map<string, IRole> = new Map();
+  private cacheExpiry: number = 5 * 60 * 1000;
+  private lastCacheUpdate: number = 0;
 
-  constructor() {
-    this.initializeDefaultRoles();
-  }
+  constructor(
+    @inject("RoleRepository") private roleRepository: IRoleRepository,
+    @inject(AuthGrpcClient) private authGrpcClient: AuthGrpcClient
+  ) {}
 
-  private initializeDefaultRoles(): void {
-    Object.values(RoleEnum).forEach((roleName) => {
-      const roleConfig = DEFAULT_ROLES[roleName as keyof typeof DEFAULT_ROLES];
-      if (roleConfig) {
-        const role: IRole = {
-          name: roleConfig.name,
-          description: roleConfig.description,
-          permissions: roleConfig.permissions,
-          isActive: true,
-          organizationId: "default",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        this.roles.set(`${roleName}:default`, role);
+  async getRoleByName(name: string, organizationId: string = "default"): Promise<IRole | null> {
+    try {
+      const cacheKey = `${name}:${organizationId}`;
+      
+      if (this.roleCache.has(cacheKey) && Date.now() - this.lastCacheUpdate < this.cacheExpiry) {
+        this.logger.info(`Role ${name} retrieved from cache`);
+        return this.roleCache.get(cacheKey) || null;
       }
-    });
-    this.logger.info("Default roles initialized");
-  }
 
-  async getRole(name: string, organizationId: string): Promise<IRole | null> {
-    const key = `${name}:${organizationId}`;
-    return this.roles.get(key) || null;
-  }
-
-  async getRoleByName(name: string): Promise<IRole | null> {
-    for (const [, role] of this.roles) {
-      if (role.name === name) {
-        return role;
+      const role = await this.authGrpcClient.getRoleByName(name, organizationId);
+      
+      if (role) {
+        this.roleCache.set(cacheKey, role);
+        this.lastCacheUpdate = Date.now();
       }
-    }
-    return null;
-  }
-
-  async getAllRoles(organizationId: string): Promise<IRole[]> {
-    const roles: IRole[] = [];
-    for (const [key, role] of this.roles) {
-      if (role.organizationId === organizationId) {
-        roles.push(role);
+      
+      return role;
+    } catch (error: any) {
+      this.logger.error(`Error fetching role ${name} from Auth Service:`, error);
+      try {
+        const localRole = await this.roleRepository.findByName(name, organizationId);
+        return localRole || null;
+      } catch (fallbackError) {
+        this.logger.error("Fallback to local database failed:", fallbackError);
+        return null;
       }
     }
-    return roles;
+  }
+
+  async getAllRoles(organizationId: string = "default"): Promise<IRole[]> {
+    try {
+      const roles = await this.authGrpcClient.getAllRoles(organizationId);
+      
+      roles.forEach(role => {
+        const cacheKey = `${role.name}:${organizationId}`;
+        this.roleCache.set(cacheKey, role);
+      });
+      this.lastCacheUpdate = Date.now();
+      
+      return roles;
+    } catch (error: any) {
+      this.logger.error("Error fetching roles from Auth Service:", error);
+      try {
+        const localRoles = await this.roleRepository.findAll(organizationId);
+        return localRoles;
+      } catch (fallbackError) {
+        this.logger.error("Fallback to local database failed:", fallbackError);
+        return [];
+      }
+    }
   }
 
   async createRole(roleInput: IRoleInput): Promise<IRole> {
-    const key = `${roleInput.name}:${roleInput.organizationId}`;
-
-    if (this.roles.has(key)) {
-      throw new Error(`Role ${roleInput.name} already exists`);
+    try {
+      const role = await this.roleRepository.create(roleInput);
+      const cacheKey = `${role.name}:${roleInput.organizationId}`;
+      this.roleCache.set(cacheKey, role);
+      this.logger.info(`Role ${role.name} created successfully`);
+      return role;
+    } catch (error: any) {
+      this.logger.error("Error creating role:", error);
+      throw error;
     }
-
-    const role: IRole = {
-      name: roleInput.name,
-      description: roleInput.description,
-      permissions: roleInput.permissions,
-      isActive: true,
-      organizationId: roleInput.organizationId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.roles.set(key, role);
-    this.logger.info(`Role ${roleInput.name} created`);
-    return role;
   }
 
-  async updateRole(name: string, organizationId: string, updates: Partial<IRoleInput>): Promise<IRole | null> {
-    const key = `${name}:${organizationId}`;
-    const role = this.roles.get(key);
-
-    if (!role) {
-      return null;
-    }
-
-    const updatedRole: IRole = {
-      ...role,
-      ...updates,
-      name: role.name,
-      organizationId: role.organizationId,
-      updatedAt: new Date(),
-    };
-
-    this.roles.set(key, updatedRole);
-    this.logger.info(`Role ${name} updated`);
-    return updatedRole;
-  }
-
-  async deleteRole(name: string, organizationId: string): Promise<boolean> {
-    const key = `${name}:${organizationId}`;
-    const deleted = this.roles.delete(key);
-
-    if (deleted) {
-      this.logger.info(`Role ${name} deleted`);
-    }
-    return deleted;
+  clearCache(): void {
+    this.roleCache.clear();
+    this.lastCacheUpdate = 0;
+    this.logger.info("Role cache cleared");
   }
 
   hasPermission(permissions: string[], requiredPermission: string): boolean {

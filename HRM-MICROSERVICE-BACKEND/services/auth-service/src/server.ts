@@ -55,6 +55,8 @@ async function bootstrap(): Promise<void> {
       refreshToken: (call: any, callback: any) => authGrpcImpl.refreshToken(call, callback),
       getCurrentUser: (call: any, callback: any) => authGrpcImpl.getCurrentUser(call, callback),
       verifyUserExists: (call: any, callback: any) => authGrpcImpl.verifyUserExists(call, callback),
+      getRoleByName: (call: any, callback: any) => authGrpcImpl.getRoleByName(call, callback),
+      getAllRoles: (call: any, callback: any) => authGrpcImpl.getAllRoles(call, callback),
     });
     
     await startGrpcServer(grpcPort);

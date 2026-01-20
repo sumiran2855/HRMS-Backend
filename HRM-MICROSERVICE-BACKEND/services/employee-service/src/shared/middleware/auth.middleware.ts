@@ -82,6 +82,7 @@ export const requireRole = (...roles: string[]) => {
 
 export const requirePermission = (...permissions: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    console.log("🚀 ~ requirePermission ~ req:", req)
     if (!req.user) {
       res.status(401).json({
         success: false,
@@ -91,7 +92,7 @@ export const requirePermission = (...permissions: string[]) => {
       return;
     }
 
-    const hasPermission = permissions.some((permission) =>
+    const hasPermission = permissions.every((permission) =>
       req.user!.permissions.includes(permission)
     );
 

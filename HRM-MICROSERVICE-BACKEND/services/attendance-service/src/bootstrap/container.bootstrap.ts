@@ -5,6 +5,7 @@ import { AttendanceRepository } from "../infrastructure/persistence/attendance.r
 import { IAttendanceRepository } from "../application/ports/AttendanceRepository.port";
 import { AttendanceController } from "../interface/http/AttendanceController";
 import { RoleService } from "../application/services/role.service"
+import { RoleRepository, IRoleRepository } from "../domain/repositories/role.repository";
 import { AuthGrpcClient } from "../infrastructure/grpc/auth.grpc.client";
 import { EmployeeGrpcClient } from "../infrastructure/grpc/employee.grpc.client";
 import { AttendanceGrpcImpl } from "../infrastructure/grpc/attendance.grpc.impl";
@@ -24,6 +25,11 @@ export function buildContainer(): Container {
   container
     .bind<IAttendanceRepository>("AttendanceRepository")
     .to(AttendanceRepository)
+    .inSingletonScope();
+
+  container
+    .bind<IRoleRepository>("RoleRepository")
+    .to(RoleRepository)
     .inSingletonScope();
 
   container

@@ -3,12 +3,11 @@ import { createApp } from './app';
 import { initializeDatabase } from './bootstrap/db.bootstrap';
 import { buildContainer } from './bootstrap/container.bootstrap';
 import { initializeGrpcServer, startGrpcServer, shutdownGrpcServer, loadProtoDefinition, registerService, getGrpcServer } from './bootstrap/grpc.bootstrap';
-import { EmployeeGrpcImpl } from './infrastructure/grpc/employee.grpc.impl';
+import { EmployeeGrpcImpl } from './infrastructure/grpc/employee.grpc';
+import { AuthGrpcClient } from './infrastructure/grpc/auth.grpc.client';
 import { envConfig } from './config/env.config';
 import { Logger } from './shared/utils/logger.util';
 import path from 'path';
-import { RoleService } from './application/services/role.service';
-import { DEFAULT_ROLES, RoleEnum } from './domain/entities/Role.entity';
 
 const logger = new Logger('Server');
 
@@ -23,23 +22,9 @@ async function bootstrap() {
     const container = buildContainer();
     logger.info('✓ DI container initialized');
 
-    const roleService = container.get<RoleService>(RoleService);
-    for (const roleName of Object.values(RoleEnum)) {
-      const roleConfig = DEFAULT_ROLES[roleName as keyof typeof DEFAULT_ROLES];
-      if (roleConfig) {
-        const existingRole = await roleService.getRoleByName(roleConfig.name);
-        if (!existingRole) {
-          await roleService.createRole({
-            name: roleConfig.name,
-            description: roleConfig.description,
-            permissions: roleConfig.permissions,
-            organizationId: "default",
-          });
-          logger.info(`✓ Role ${roleConfig.name} initialized`);
-        }
-      }
-    }
-    logger.info('✓ Default roles ready');
+    const authGrpcClient = container.get<AuthGrpcClient>(AuthGrpcClient);
+    await authGrpcClient.initialize();
+    logger.info('✓ Auth gRPC client initialized');
 
     const app = createApp(container);
 

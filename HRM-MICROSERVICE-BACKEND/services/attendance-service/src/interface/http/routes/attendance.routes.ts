@@ -24,12 +24,24 @@ router.use(authMiddleware as RequestHandler);
 router.use(ensureTenantContext);
 
 
-router.post(
-  "/",
-  requirePermission(PermissionEnum.CREATE_ATTENDANCE) as RequestHandler,
-  (req: any, res: Response) => attendanceController.createAttendance(req, res)
-);
+// router.post(
+//   "/",
+//   requirePermission(PermissionEnum.CREATE_ATTENDANCE) as RequestHandler,
+//   (req: any, res: Response) => attendanceController.createAttendance(req, res)
+// );
 
+router.post(
+    "/",
+    requirePermission(PermissionEnum.CREATE_ATTENDANCE) as RequestHandler,
+    async (req: any, res: Response, next: NextFunction) => {
+      try {
+        const controller = container.get<AttendanceController>(AttendanceController);
+        await controller.createAttendance(req, res);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
 router.get(
   "/:id",

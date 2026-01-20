@@ -348,10 +348,24 @@ export class AttendanceController {
           error.statusCode
         )
       );
+    } else if (error.code === 3 || error.message?.includes('INVALID_ARGUMENT')) {
+      res.status(400).json(
+        ResponseFormatter.error(
+          error.message || 'Invalid request',
+          400
+        )
+      );
+    } else if (error.code === 5 || error.message?.includes('NOT_FOUND')) {
+      res.status(404).json(
+        ResponseFormatter.error(
+          error.message || 'Employee not found',
+          404
+        )
+      );
     } else {
       res.status(500).json(
         ResponseFormatter.error(
-          "Internal server error",
+          error.message || 'Internal server error',
           500
         )
       );

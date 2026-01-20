@@ -8,6 +8,7 @@ import {
   validateRequestBody,
   trimRequestBody,
 } from "../middleware/validation.middleware";
+import { tokenBlacklistCheckMiddleware } from "../../../shared/middleware/token-blacklist.middleware";
 import { Logger } from "../../../shared/utils/logger.util";
 
 const logger = new Logger("AuthRoutes");
@@ -62,6 +63,7 @@ export function registerAuthRoutes(
 
   router.post(
     "/validate-token",
+    tokenBlacklistCheckMiddleware,
     (req: Request, res: Response, next: NextFunction) =>
       authMiddleware(req, res, next),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -76,6 +78,7 @@ export function registerAuthRoutes(
 
   router.post(
     "/current-user",
+    tokenBlacklistCheckMiddleware,
     (req: Request, res: Response, next: NextFunction) =>
       authMiddleware(req, res, next),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -90,6 +93,7 @@ export function registerAuthRoutes(
 
   router.post(
     "/logout",
+    tokenBlacklistCheckMiddleware,
     (req: Request, res: Response, next: NextFunction) =>
       authMiddleware(req, res, next),
     async (req: Request, res: Response, next: NextFunction) => {

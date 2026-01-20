@@ -7,6 +7,7 @@ const logger = new Logger('EmployeeGrpcClient');
 
 export class EmployeeGrpcClient {
   private client: any;
+  private isHealthy: boolean = false;
 
   constructor(
     private employeeServiceUrl: string = 'localhost:5002'
@@ -14,7 +15,12 @@ export class EmployeeGrpcClient {
 
   async initialize(): Promise<void> {
     try {
+      if (this.client && this.isHealthy) {
+        return;
+      }
+
       const protoPath = path.join(__dirname, '../../../../proto', 'employee.proto');
+      console.log("🚀 ~ EmployeeGrpcClient ~ initialize ~ protoPath:", protoPath)
       const packageDefinition = protoLoader.loadSync(
         protoPath,
         {
@@ -25,6 +31,7 @@ export class EmployeeGrpcClient {
           oneofs: true,
         }
       );
+      console.log("🚀 ~ EmployeeGrpcClient ~ initialize ~ packageDefinition:", packageDefinition)
 
       const employeeProto: any = grpc.loadPackageDefinition(packageDefinition);
       this.client = new employeeProto.employee.EmployeeService(
@@ -32,11 +39,35 @@ export class EmployeeGrpcClient {
         grpc.credentials.createInsecure()
       );
 
-      logger.info(`Connected to Employee Service at ${this.employeeServiceUrl}`);
+      await this.healthCheck();
+      
+      this.isHealthy = true;
+      logger.info(`✓ Connected to Employee Service at ${this.employeeServiceUrl}`);
     } catch (error) {
+      this.isHealthy = false;
       logger.error('Failed to initialize Employee gRPC client', error);
       throw error;
     }
+  }
+
+  private async healthCheck(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error(`Employee Service at ${this.employeeServiceUrl} is not responding`));
+      }, 5000);
+
+      this.client.getAllEmployees(
+        { filter: {} },
+        (err: any, response: any) => {
+          clearTimeout(timeout);
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
   }
 
   async getEmployeeById(id: string): Promise<any> {

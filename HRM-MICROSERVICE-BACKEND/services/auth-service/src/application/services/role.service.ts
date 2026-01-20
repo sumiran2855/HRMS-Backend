@@ -1,110 +1,122 @@
-import { injectable } from "inversify";
+import { injectable, inject } from "inversify";
 import { Logger } from "../../shared/utils/logger.util";
-import { IRole, IRoleInput, DEFAULT_ROLES, RoleEnum } from "../../domain/entities/Role.entity";
+import { IRole, IRoleInput } from "../../domain/entities/Role.entity";
+import { IRoleRepository } from "../../domain/repositories/role.repository";
 
 @injectable()
 export class RoleService {
   private logger = new Logger("RoleService");
-  private roles: Map<string, IRole> = new Map();
+  private roleCache: Map<string, IRole> = new Map();
+  private cacheExpiry: number = 5 * 60 * 1000; // 5 minutes
+  private lastCacheUpdate: number = 0;
 
-  constructor() {
-    this.initializeDefaultRoles();
+  constructor(@inject("RoleRepository") private roleRepository: IRoleRepository) {
+    this.initializeCache();
   }
 
-  private initializeDefaultRoles(): void {
-    Object.values(RoleEnum).forEach((roleName) => {
-      const roleConfig = DEFAULT_ROLES[roleName as keyof typeof DEFAULT_ROLES];
-      if (roleConfig) {
-        const role: IRole = {
-          name: roleConfig.name,
-          description: roleConfig.description,
-          permissions: roleConfig.permissions,
-          isActive: true,
-          organizationId: "default",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        this.roles.set(`${roleName}:default`, role);
-      }
-    });
-    this.logger.info("Default roles initialized");
+  private initializeCache(): void {
+    // Pre-warm cache on initialization
+    this.getAllRoles().catch(err => 
+      this.logger.error("Error warming role cache:", err)
+    );
   }
 
-  async getRole(name: string, organizationId: string): Promise<IRole | null> {
-    const key = `${name}:${organizationId}`;
-    return this.roles.get(key) || null;
-  }
-
-  async getRoleByName(name: string): Promise<IRole | null> {
-    for (const [, role] of this.roles) {
-      if (role.name === name) {
-        return role;
-      }
+  async getRole(name: string, organizationId: string = "default"): Promise<IRole | null> {
+    const cacheKey = `${name}:${organizationId}`;
+    
+    // Check cache first
+    if (this.roleCache.has(cacheKey) && this.isCacheValid()) {
+      return this.roleCache.get(cacheKey) || null;
     }
-    return null;
-  }
-
-  async getAllRoles(organizationId: string): Promise<IRole[]> {
-    const roles: IRole[] = [];
-    for (const [key, role] of this.roles) {
-      if (role.organizationId === organizationId) {
-        roles.push(role);
-      }
+    
+    // Cache miss or expired - query DB
+    const role = await this.roleRepository.findByName(name, organizationId);
+    if (role) {
+      this.roleCache.set(cacheKey, role);
+      this.lastCacheUpdate = Date.now();
     }
-    return roles;
-  }
-
-  async createRole(roleInput: IRoleInput): Promise<IRole> {
-    const key = `${roleInput.name}:${roleInput.organizationId}`;
-
-    if (this.roles.has(key)) {
-      throw new Error(`Role ${roleInput.name} already exists`);
-    }
-
-    const role: IRole = {
-      name: roleInput.name,
-      description: roleInput.description,
-      permissions: roleInput.permissions,
-      isActive: true,
-      organizationId: roleInput.organizationId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.roles.set(key, role);
-    this.logger.info(`Role ${roleInput.name} created`);
     return role;
   }
 
-  async updateRole(name: string, organizationId: string, updates: Partial<IRoleInput>): Promise<IRole | null> {
-    const key = `${name}:${organizationId}`;
-    const role = this.roles.get(key);
-
-    if (!role) {
-      return null;
-    }
-
-    const updatedRole: IRole = {
-      ...role,
-      ...updates,
-      name: role.name,
-      organizationId: role.organizationId,
-      updatedAt: new Date(),
-    };
-
-    this.roles.set(key, updatedRole);
-    this.logger.info(`Role ${name} updated`);
-    return updatedRole;
+  async getRoleByName(name: string, organizationId: string = "default"): Promise<IRole | null> {
+    return this.getRole(name, organizationId);
   }
 
-  async deleteRole(name: string, organizationId: string): Promise<boolean> {
-    const key = `${name}:${organizationId}`;
-    const deleted = this.roles.delete(key);
-
-    if (deleted) {
-      this.logger.info(`Role ${name} deleted`);
+  async getAllRoles(organizationId: string = "default"): Promise<IRole[]> {
+    // Check if cache is still valid
+    if (this.roleCache.size > 0 && this.isCacheValid()) {
+      const cached = Array.from(this.roleCache.values()).filter(
+        r => r.organizationId === organizationId
+      );
+      if (cached.length > 0) {
+        return cached;
+      }
     }
-    return deleted;
+    
+    // Cache miss or expired - query DB
+    const roles = await this.roleRepository.findAll(organizationId);
+    
+    // Update cache
+    roles.forEach(role => {
+      const cacheKey = `${role.name}:${organizationId}`;
+      this.roleCache.set(cacheKey, role);
+    });
+    this.lastCacheUpdate = Date.now();
+    
+    return roles;
+  }
+
+  private isCacheValid(): boolean {
+    return Date.now() - this.lastCacheUpdate < this.cacheExpiry;
+  }
+
+  clearCache(): void {
+    this.roleCache.clear();
+    this.lastCacheUpdate = 0;
+    this.logger.info("Role cache cleared");
+  }
+
+  async createRole(roleInput: IRoleInput): Promise<IRole> {
+    try {
+      const existingRole = await this.roleRepository.findByName(roleInput.name, roleInput.organizationId);
+      if (existingRole) {
+        this.logger.warn(`Role ${roleInput.name} already exists`);
+        return existingRole;
+      }
+      
+      const role = await this.roleRepository.create(roleInput);
+      this.logger.info(`Role ${role.name} created in database`);
+      return role;
+    } catch (error: any) {
+      this.logger.error("Error creating role:", error);
+      throw error;
+    }
+  }
+
+  async updateRole(id: string, updates: Partial<IRoleInput>): Promise<IRole | null> {
+    try {
+      const role = await this.roleRepository.update(id, updates);
+      if (role) {
+        this.logger.info(`Role ${role.name} updated`);
+      }
+      return role;
+    } catch (error: any) {
+      this.logger.error("Error updating role:", error);
+      throw error;
+    }
+  }
+
+  async deleteRole(id: string): Promise<boolean> {
+    try {
+      const deleted = await this.roleRepository.delete(id);
+      if (deleted) {
+        this.logger.info(`Role deleted`);
+      }
+      return deleted;
+    } catch (error: any) {
+      this.logger.error("Error deleting role:", error);
+      throw error;
+    }
   }
 
   hasPermission(permissions: string[], requiredPermission: string): boolean {

@@ -32,6 +32,7 @@ export const authMiddleware = (
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as any;
+    console.log("🚀 ~ authMiddleware ~ decoded:", decoded)
 
     req.user = {
       userId: decoded.sub || decoded.userId,
@@ -91,7 +92,7 @@ export const requirePermission = (...permissions: string[]) => {
       return;
     }
 
-    const hasPermission = permissions.some((permission) =>
+    const hasPermission = permissions.every((permission) =>
       req.user!.permissions.includes(permission)
     );
 

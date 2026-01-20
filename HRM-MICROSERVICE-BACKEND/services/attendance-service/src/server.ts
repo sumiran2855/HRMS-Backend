@@ -15,8 +15,6 @@ import { EmployeeGrpcClient } from "./infrastructure/grpc/employee.grpc.client";
 import { AttendanceGrpcImpl } from "./infrastructure/grpc/attendance.grpc.impl";
 import { envConfig } from "./config/env.config";
 import { Logger } from "./shared/utils/logger.util";
-import { RoleService } from "./application/services/role.service";
-import { DEFAULT_ROLES, RoleEnum } from "./domain/entities/Role.entity";
   
 const logger = new Logger("Server");
 
@@ -31,24 +29,9 @@ async function bootstrap(): Promise<void> {
     const container = buildContainer();
     logger.info("✓ Dependency injection container built");
 
-
-    const roleService = container.get<RoleService>(RoleService);
-    for (const roleName of Object.values(RoleEnum)) {
-      const roleConfig = DEFAULT_ROLES[roleName as keyof typeof DEFAULT_ROLES];
-      if (roleConfig) {
-        const existingRole = await roleService.getRoleByName(roleConfig.name);
-        if (!existingRole) {
-          await roleService.createRole({
-            name: roleConfig.name,
-            description: roleConfig.description,
-            permissions: roleConfig.permissions,
-            organizationId: "default",
-          });
-          logger.info(`✓ Role ${roleConfig.name} initialized`);
-        }
-      }
-    }
-    logger.info('✓ Default roles ready');
+    const authGrpcClient = container.get<AuthGrpcClient>(AuthGrpcClient);
+    await authGrpcClient.initialize();
+    logger.info("✓ Auth gRPC client initialized");
 
     const app = createApp();
 

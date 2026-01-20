@@ -21,40 +21,43 @@ export interface IJwtService {
 @injectable()
 export class JwtService implements IJwtService {
   generateToken(payload: ITokenPayload): string {
-    const options: SignOptions = {
-      expiresIn: envConfig.jwtExpiration || '1h',
-      subject: payload.userId,
-      algorithm: 'HS256',
-    };
-    
-    const tokenPayload = {
-      userId: payload.userId,
-      email: payload.email,
-      username: payload.username,
-      organizationId: payload.organizationId || 'default',
-      role: payload.role || 'employee',
-      permissions: payload.permissions || [],
-    };
-    
-    return jwt.sign(tokenPayload, envConfig.jwtSecret as string, options);
+    // Use payload directly, adding defaults inline
+    return jwt.sign(
+      {
+        userId: payload.userId,
+        email: payload.email,
+        username: payload.username,
+        organizationId: payload.organizationId || 'default',
+        role: payload.role || 'employee',
+        permissions: payload.permissions || [],
+      },
+      envConfig.jwtSecret as string,
+      {
+        expiresIn: envConfig.jwtExpiration || '1h',
+        subject: payload.userId,
+        algorithm: 'HS256',
+      }
+    );
   }
 
   generateRefreshToken(payload: ITokenPayload): string {
-    const options: SignOptions = {
-      expiresIn: envConfig.jwtRefreshExpiration || '7d',
-      subject: payload.userId,
-      algorithm: 'HS256',
-    };
-    
-    const tokenPayload = {
-      userId: payload.userId,
-      email: payload.email,
-      username: payload.username,
-      organizationId: payload.organizationId || 'default',
-      role: payload.role || 'employee',
-    };
-    
-    return jwt.sign(tokenPayload, envConfig.jwtRefreshSecret as string, options);
+    // Use payload directly, adding defaults inline
+    return jwt.sign(
+      {
+        userId: payload.userId,
+        email: payload.email,
+        username: payload.username,
+        organizationId: payload.organizationId || 'default',
+        role: payload.role || 'employee',
+        permissions: payload.permissions || [],
+      },
+      envConfig.jwtRefreshSecret as string,
+      {
+        expiresIn: envConfig.jwtRefreshExpiration || '7d',
+        subject: payload.userId,
+        algorithm: 'HS256',
+      }
+    );
   }
 
   verifyToken(token: string): ITokenPayload | null {

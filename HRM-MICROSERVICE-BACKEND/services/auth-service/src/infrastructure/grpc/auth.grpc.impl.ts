@@ -1,10 +1,12 @@
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { Logger } from '../../shared/utils/logger.util';
+import { RoleService } from '../../application/services/role.service';
 
 const logger = new Logger('AuthGrpcImpl');
 
 @injectable()
 export class AuthGrpcImpl {
+  constructor(@inject(RoleService) private roleService: RoleService) {}
   async register(call: any, callback: any) {
     try {
       const { email, username, password, fullName } = call.request;
@@ -142,6 +144,72 @@ export class AuthGrpcImpl {
       });
     } catch (error) {
       logger.error('Error verifying user exists via gRPC', error);
+      callback({
+        code: 'INTERNAL',
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async getRoleByName(call: any, callback: any) {
+    try {
+      const { name, organizationId = 'default' } = call.request;
+
+      const role = await this.roleService.getRoleByName(name, organizationId);
+
+      if (!role) {
+        return callback({
+          code: 'NOT_FOUND',
+          message: `Role ${name} not found`,
+        });
+      }
+
+      callback(null, {
+        success: true,
+        message: 'Role retrieved successfully',
+        data: {
+          name: role.name,
+          description: role.description,
+          permissions: role.permissions || [],
+          isActive: role.isActive,
+          organizationId: role.organizationId,
+          createdAt: new Date(role.createdAt).getTime(),
+          updatedAt: new Date(role.updatedAt).getTime(),
+        },
+      });
+    } catch (error) {
+      logger.error('Error getting role by name via gRPC', error);
+      callback({
+        code: 'INTERNAL',
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async getAllRoles(call: any, callback: any) {
+    try {
+      const { organizationId = 'default' } = call.request;
+
+      const roles = await this.roleService.getAllRoles(organizationId);
+
+      const rolesData = roles.map(role => ({
+        name: role.name,
+        description: role.description,
+        permissions: role.permissions || [],
+        isActive: role.isActive,
+        organizationId: role.organizationId,
+        createdAt: new Date(role.createdAt).getTime(),
+        updatedAt: new Date(role.updatedAt).getTime(),
+      }));
+
+      callback(null, {
+        success: true,
+        message: 'Roles retrieved successfully',
+        data: rolesData,
+        total: rolesData.length,
+      });
+    } catch (error) {
+      logger.error('Error getting all roles via gRPC', error);
       callback({
         code: 'INTERNAL',
         message: 'Internal server error',

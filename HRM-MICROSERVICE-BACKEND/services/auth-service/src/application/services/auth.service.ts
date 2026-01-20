@@ -4,6 +4,7 @@ import { IPasswordService } from "./password.service";
 import { IJwtService } from "./jwt.service";
 import { RoleService } from "./role.service";
 import { RoleEnum } from "../../domain/entities/Role.entity";
+import { ITokenBlacklistService } from "./token-blacklist.service";
 
 export interface IAuthService {
   register(
@@ -14,6 +15,7 @@ export interface IAuthService {
     role?: string
   ): Promise<any>;
   login(email: string, password: string): Promise<any>;
+  logout(token: string, userId: string): Promise<void>;
   validateToken(token: string): Promise<any>;
   refreshToken(refreshToken: string): Promise<any>;
   getCurrentUser(userId: string): Promise<any>;
@@ -25,7 +27,9 @@ export class AuthService implements IAuthService {
     @inject("UserRepository") private userRepository: IUserRepository,
     @inject("PasswordService") private passwordService: IPasswordService,
     @inject("JwtService") private jwtService: IJwtService,
-    @inject(RoleService) private roleService: RoleService
+    @inject(RoleService) private roleService: RoleService,
+    @inject("TokenBlacklistService")
+    private tokenBlacklistService: ITokenBlacklistService
   ) {}
 
   async register(
@@ -85,25 +89,32 @@ export class AuthService implements IAuthService {
   }
 
   async login(email: string, password: string): Promise<any> {
+    // Query user from DB (with index on email, should be fast)
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new Error("Invalid email or password");
     }
 
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
-    }
-
+    // Fast-fail on inactive user before password check
     if (!user.isActive) {
       throw new Error("User account is inactive");
     }
 
-    const userRole = await this.roleService.getRoleByName(user.role || RoleEnum.EMPLOYEE);
+    // Parallel: check password and get role (both can run concurrently)
+    const [isPasswordValid, userRole] = await Promise.all([
+      user.comparePassword(password),
+      this.roleService.getRoleByName(user.role || RoleEnum.EMPLOYEE)
+    ]);
+
+    if (!isPasswordValid) {
+      throw new Error("Invalid email or password");
+    }
+
     if (!userRole) {
       throw new Error("User role not found");
     }
 
+    // Create payload once
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
@@ -113,8 +124,11 @@ export class AuthService implements IAuthService {
       permissions: userRole.permissions,
     };
     
-    const accessToken = this.jwtService.generateToken(tokenPayload);
-    const refreshToken = this.jwtService.generateRefreshToken(tokenPayload);
+    // Parallel: generate both tokens
+    const [accessToken, refreshToken] = await Promise.all([
+      Promise.resolve(this.jwtService.generateToken(tokenPayload)),
+      Promise.resolve(this.jwtService.generateRefreshToken(tokenPayload))
+    ]);
 
     return {
       message: "Login successful",
@@ -135,20 +149,37 @@ export class AuthService implements IAuthService {
     if (!payload) {
       throw new Error("Invalid or expired refresh token");
     }
+    const userRole = await this.roleService.getRoleByName(payload.role || RoleEnum.EMPLOYEE);
     const newAccessToken = this.jwtService.generateToken({
       userId: payload.userId,
       email: payload.email,
       username: payload.username,
+      organizationId: payload.organizationId,
+      role: payload.role,
+      permissions: userRole?.permissions || [],
     });
     return { accessToken: newAccessToken };
   }
 
   async validateToken(token: string): Promise<any> {
+    const isBlacklisted = await this.tokenBlacklistService.isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      throw new Error("Token has been revoked. Please login again.");
+    }
+
     const payload = this.jwtService.verifyToken(token);
     if (!payload) {
       throw new Error("Invalid or expired token");
     }
     return payload;
+  }
+
+  async logout(token: string, userId: string): Promise<void> {
+    try {
+      await this.tokenBlacklistService.blacklistToken(token, userId);
+    } catch (error: any) {
+      throw new Error(`Logout failed: ${error.message}`);
+    }
   }
 
   async getCurrentUser(userId: string): Promise<any> {

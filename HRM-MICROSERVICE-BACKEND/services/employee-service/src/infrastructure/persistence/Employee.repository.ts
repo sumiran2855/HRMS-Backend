@@ -1,6 +1,10 @@
 import { injectable } from 'inversify';
 import { Employee } from '../../domain/models/employee.model';
 import { IEmployeeRepository } from '../../domain/repositories/employee.repository';
+import { Logger } from '../../shared/utils/logger.util';
+import * as mongoose from 'mongoose';
+
+const logger = new Logger('EmployeeRepository');
 
 @injectable()
 export class EmployeeRepository implements IEmployeeRepository {
@@ -10,6 +14,10 @@ export class EmployeeRepository implements IEmployeeRepository {
   }
 
   async findById(id: string): Promise<any | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn(`Invalid ObjectId format: ${id}`);
+      return null;
+    }
     return await Employee.findById(id);
   }
 

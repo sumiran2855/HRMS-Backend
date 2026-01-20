@@ -10,11 +10,16 @@ export class EmployeeGrpcClient {
   private channel: grpc.Channel | null = null;
 
   constructor(
-    private employeeServiceUrl: string = 'localhost:5002'
+    private employeeServiceUrl: string = 'localhost:5002',
+    private isHealthy: boolean = false
+
   ) {}
 
   async initialize(): Promise<void> {
     try {
+      if (this.client && this.isHealthy) {
+        return;
+      }
       const protoPath = path.join(__dirname, '../../../../proto', 'employee.proto');
       const packageDefinition = protoLoader.loadSync(
         protoPath,
@@ -32,12 +37,33 @@ export class EmployeeGrpcClient {
         this.employeeServiceUrl,
         grpc.credentials.createInsecure()
       );
-
+      await this.healthCheck();
+      this.isHealthy = true;
       logger.info(`Connected to Employee Service at ${this.employeeServiceUrl}`);
     } catch (error) {
       logger.error('Failed to initialize Employee gRPC client', error);
       throw error;
     }
+  }
+
+  private async healthCheck(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error(`Employee Service at ${this.employeeServiceUrl} is not responding`));
+      }, 5000);
+
+      this.client.getAllEmployees(
+        { filter: {} },
+        (err: any, response: any) => {
+          clearTimeout(timeout);
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
   }
 
   async getEmployeeByEmail(email: string): Promise<any> {

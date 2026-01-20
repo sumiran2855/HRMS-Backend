@@ -1,15 +1,19 @@
 import * as grpc from '@grpc/grpc-js';
-import { Container } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { IEmployeeService } from '../../application/services/employee.service';
 import { Logger } from '../../shared/utils/logger.util';
 
 const logger = new Logger('EmployeeGrpcImpl');
 
+@injectable()
 export class EmployeeGrpcImpl {
   private employeeService: IEmployeeService;
 
-  constructor(container: Container) {
-    this.employeeService = container.get<IEmployeeService>('EmployeeService');
+  constructor(
+    @inject('EmployeeService')
+    employeeService: IEmployeeService
+  ) {
+    this.employeeService = employeeService;
   }
 
   async createEmployee(
@@ -71,10 +75,17 @@ export class EmployeeGrpcImpl {
       });
     } catch (error: any) {
       logger.error('gRPC: Failed to get employee', error);
-      callback({
-        code: grpc.status.INTERNAL,
-        message: error.message || 'Failed to get employee',
-      });
+      if (error.message?.includes('Cast to ObjectId failed') || error.message?.includes('Invalid ObjectId')) {
+        callback({
+          code: grpc.status.INVALID_ARGUMENT,
+          message: 'Invalid employee ID format',
+        });
+      } else {
+        callback({
+          code: grpc.status.INTERNAL,
+          message: error.message || 'Failed to get employee',
+        });
+      }
     }
   }
 

@@ -15,7 +15,7 @@ export class AuthGrpcClient {
 
   async initialize(): Promise<void> {
     try {
-      const protoPath = path.join(__dirname, '../../../proto');
+      const protoPath = path.join(__dirname, '../../../../proto');
       const packageDefinition = protoLoader.loadSync(
         path.join(protoPath, 'auth.proto'),
         {
@@ -82,6 +82,42 @@ export class AuthGrpcClient {
             resolve(false);
           } else {
             resolve(response.isValid);
+          }
+        }
+      );
+    });
+  }
+
+  async getRoleByName(name: string, organizationId: string = 'default'): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.client.getRoleByName(
+        { name, organizationId },
+        (err: any, response: any) => {
+          if (err) {
+            logger.error(`Failed to get role ${name}`, err);
+            reject(err);
+          } else if (response && response.data) {
+            resolve(response.data);
+          } else {
+            resolve(null);
+          }
+        }
+      );
+    });
+  }
+
+  async getAllRoles(organizationId: string = 'default'): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.client.getAllRoles(
+        { organizationId },
+        (err: any, response: any) => {
+          if (err) {
+            logger.error('Failed to get all roles', err);
+            reject(err);
+          } else if (response && response.data) {
+            resolve(response.data);
+          } else {
+            resolve([]);
           }
         }
       );
