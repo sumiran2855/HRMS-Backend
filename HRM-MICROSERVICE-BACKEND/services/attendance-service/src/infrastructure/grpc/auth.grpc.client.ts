@@ -50,7 +50,6 @@ export class AuthGrpcClient {
       const timeout = setTimeout(() => {
         reject(new Error(`Auth Service at ${this.authServiceUrl} is not responding`));
       }, 5000);
-      console.log("🚀 ~ AuthGrpcClient ~ healthCheck ~ this.client:", this.client)
       this.client.getAllRoles({ organizationId: 'default' }, (err: any, response: any) => {
         clearTimeout(timeout);
         if (err) {

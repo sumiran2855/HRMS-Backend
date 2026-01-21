@@ -20,7 +20,6 @@ export class EmployeeGrpcClient {
       }
 
       const protoPath = path.join(__dirname, '../../../../proto', 'employee.proto');
-      console.log("🚀 ~ EmployeeGrpcClient ~ initialize ~ protoPath:", protoPath)
       const packageDefinition = protoLoader.loadSync(
         protoPath,
         {
@@ -31,7 +30,6 @@ export class EmployeeGrpcClient {
           oneofs: true,
         }
       );
-      console.log("🚀 ~ EmployeeGrpcClient ~ initialize ~ packageDefinition:", packageDefinition)
 
       const employeeProto: any = grpc.loadPackageDefinition(packageDefinition);
       this.client = new employeeProto.employee.EmployeeService(

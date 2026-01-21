@@ -13,7 +13,6 @@ export const tokenBlacklistCheckMiddleware = async (
   try {
     const authHeader = req.headers.authorization;
     
-    // If no auth header, skip blacklist check
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return next();
     }
@@ -23,7 +22,6 @@ export const tokenBlacklistCheckMiddleware = async (
       "TokenBlacklistService"
     );
 
-    // Check if token is blacklisted
     const isBlacklisted = await tokenBlacklistService.isTokenBlacklisted(token);
     
     if (isBlacklisted) {
@@ -41,7 +39,6 @@ export const tokenBlacklistCheckMiddleware = async (
     next();
   } catch (error: any) {
     logger.error("[TokenBlacklistMiddleware] Error checking token blacklist:", error);
-    // Fail open - if check fails, allow the request to proceed
     next();
   }
 };

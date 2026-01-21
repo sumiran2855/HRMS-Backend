@@ -296,13 +296,11 @@ export class AttendanceService {
         { organizationId }
       );
 
-      // Validate all employees exist before processing
       const employeeIds = [...new Set(attendances.map(a => a.employeeId))];
       for (const employeeId of employeeIds) {
         await this.validateEmployeeExists(employeeId);
       }
 
-      // Process each attendance record based on its status
       const processedAttendances = attendances.map((attendance) =>
         this.processAttendanceData(attendance)
       );
@@ -351,14 +349,9 @@ export class AttendanceService {
   }
 
   
-  /**
-   * Process attendance update data based on status
-   * Ensures consistency when updating attendance records
-   */
   private processAttendanceUpdate(
     updateData: Partial<IAttendanceInput>
   ): Partial<IAttendanceInput> {
-    // If status is not being updated, return as-is
     if (!updateData.status) {
       return updateData;
     }
@@ -367,7 +360,6 @@ export class AttendanceService {
 
     switch (updateData.status) {
       case "leave":
-        // For leave: clear check-in/out times and working hours
         processed.checkInTime = undefined;
         processed.checkOutTime = undefined;
         processed.workHours = 0;
@@ -375,7 +367,6 @@ export class AttendanceService {
         break;
 
       case "absent":
-        // For absent: clear check-in/out times
         processed.checkInTime = undefined;
         processed.checkOutTime = undefined;
         processed.workHours = 0;
@@ -383,7 +374,6 @@ export class AttendanceService {
         break;
 
       case "half-day":
-        // For half-day: recalculate if times are provided
         if (processed.checkInTime && processed.checkOutTime) {
           const workHours = this.calculateWorkingHours(
             processed.checkInTime,
@@ -399,7 +389,6 @@ export class AttendanceService {
 
       case "present":
       case "late":
-        // For present/late: recalculate if times are provided
         if (processed.checkInTime && processed.checkOutTime) {
           const workHours = this.calculateWorkingHours(
             processed.checkInTime,
@@ -415,10 +404,6 @@ export class AttendanceService {
     return processed;
   }
 
-  /**
-   * Process attendance data based on status
-   * Handles special cases like leave, half-day, and absent
-   */
   private processAttendanceData(
     attendance: IAttendanceInput
   ): IAttendanceInput {
@@ -426,7 +411,6 @@ export class AttendanceService {
 
     switch (attendance.status) {
       case "leave":
-        // For leave: clear check-in/out times and working hours
         processed.checkInTime = undefined;
         processed.checkOutTime = undefined;
         processed.workHours = 0;
@@ -437,7 +421,6 @@ export class AttendanceService {
         break;
 
       case "absent":
-        // For absent: clear check-in/out times
         processed.checkInTime = undefined;
         processed.checkOutTime = undefined;
         processed.workHours = 0;
@@ -448,20 +431,17 @@ export class AttendanceService {
         break;
 
       case "half-day":
-        // For half-day: calculate working hours if both times provided, max 4 hours
         if (processed.checkInTime && processed.checkOutTime) {
           const workHours = this.calculateWorkingHours(
             processed.checkInTime,
             processed.checkOutTime
           );
-          // Half-day should typically be around 4 hours
           processed.workHours = Math.min(workHours, 4);
           processed.overtime = 0;
           this.logger.info(
             `Half-day record processed for employee ${attendance.employeeId}, work hours: ${processed.workHours}`
           );
         } else {
-          // If times not provided, default to 0
           processed.workHours = 0;
           processed.overtime = 0;
         }
@@ -469,7 +449,6 @@ export class AttendanceService {
 
       case "present":
       case "late":
-        // For present/late: calculate working hours and overtime if both times provided
         if (processed.checkInTime && processed.checkOutTime) {
           const workHours = this.calculateWorkingHours(
             processed.checkInTime,
@@ -477,7 +456,6 @@ export class AttendanceService {
           );
           processed.workHours = workHours;
 
-          // Calculate overtime (anything over 8 hours)
           const standardWorkHours = 8;
           processed.overtime =
             workHours > standardWorkHours
@@ -488,14 +466,12 @@ export class AttendanceService {
             `Work record processed for employee ${attendance.employeeId}, work hours: ${processed.workHours}, overtime: ${processed.overtime}`
           );
         } else {
-          // If times not provided, default to 0
           processed.workHours = processed.workHours || 0;
           processed.overtime = 0;
         }
         break;
 
       default:
-        // Default: keep as is but ensure no overflow
         if (processed.checkInTime && processed.checkOutTime) {
           const workHours = this.calculateWorkingHours(
             processed.checkInTime,
@@ -509,24 +485,17 @@ export class AttendanceService {
     return processed;
   }
 
-  /**
-   * Calculate working hours between check-in and check-out time
-   */
   calculateWorkingHours(checkInTime: Date, checkOutTime: Date): number {
     const diff = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
     return Math.round(diff * 100) / 100; // Round to 2 decimal places
   }
 
-  /**
-   * Determine attendance status based on check-in time
-   */
   determineAttendanceStatus(checkInTime?: Date): "present" | "late" | "absent" {
     if (!checkInTime) return "absent";
 
     const hour = checkInTime.getHours();
     const minute = checkInTime.getMinutes();
 
-    // If check-in is after 9:30 AM, mark as late
     if (hour > 9 || (hour === 9 && minute > 30)) {
       return "late";
     }
@@ -534,9 +503,6 @@ export class AttendanceService {
     return "present";
   }
 
-  /**
-   * Get pending approvals for attendance
-   */
   async getPendingApprovals(
     organizationId: string,
     page: number = 1,

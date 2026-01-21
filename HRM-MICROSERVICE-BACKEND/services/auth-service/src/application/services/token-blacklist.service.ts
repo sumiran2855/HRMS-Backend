@@ -20,15 +20,12 @@ export class TokenBlacklistService implements ITokenBlacklistService {
   async blacklistToken(token: string, userId: string): Promise<void> {
     try {
       const decoded = jwt.decode(token) as any;
-      console.log("🚀 ~ TokenBlacklistService ~ blacklistToken ~ decoded:", decoded)
       
       if (!decoded || !decoded.exp) {
         throw new Error('Invalid token format');
       }
 
       const expiresAt = new Date(decoded.exp * 1000);
-      console.log("🚀 ~ TokenBlacklistService ~ blacklistToken ~ decoded.exp:", decoded.exp)
-      console.log("🚀 ~ TokenBlacklistService ~ blacklistToken ~ expiresAt:", expiresAt)
 
       await this.tokenBlacklistRepository.add(token, userId, expiresAt);
     } catch (error: any) {
@@ -61,7 +58,6 @@ export class TokenBlacklistService implements ITokenBlacklistService {
 
   async blacklistUserTokens(userId: string): Promise<number> {
     try {
-      // Find all non-expired blacklist entries for this user
       const blacklistedTokens = await this.tokenBlacklistRepository.findByUserId(
         userId
       );

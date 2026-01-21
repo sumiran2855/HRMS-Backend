@@ -1,8 +1,6 @@
 import { injectable } from "inversify";
 import { IRole, IRoleInput } from "../../domain/entities/Role.entity";
-// import { RoleModel } from "..//role.schema";
 import { RoleModel } from "../../infrastructure/persistence/role.schema";
-// import { RoleModel } from "src/infrastructure/persistence/role.schema";
 import { Logger } from "../../shared/utils/logger.util";
 
 export interface IRoleRepository {

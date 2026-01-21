@@ -21,7 +21,6 @@ export class TokenBlacklistRepository implements ITokenBlacklistRepository {
       userId,
       expiresAt,
     });
-    console.log("🚀 ~ TokenBlacklistRepository ~ add ~ blacklistedToken:", blacklistedToken)
     return await blacklistedToken.save();
   }
 

@@ -89,18 +89,15 @@ export class AuthService implements IAuthService {
   }
 
   async login(email: string, password: string): Promise<any> {
-    // Query user from DB (with index on email, should be fast)
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       throw new Error("Invalid email or password");
     }
 
-    // Fast-fail on inactive user before password check
     if (!user.isActive) {
       throw new Error("User account is inactive");
     }
 
-    // Parallel: check password and get role (both can run concurrently)
     const [isPasswordValid, userRole] = await Promise.all([
       user.comparePassword(password),
       this.roleService.getRoleByName(user.role || RoleEnum.EMPLOYEE)
@@ -114,7 +111,6 @@ export class AuthService implements IAuthService {
       throw new Error("User role not found");
     }
 
-    // Create payload once
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
@@ -124,7 +120,6 @@ export class AuthService implements IAuthService {
       permissions: userRole.permissions,
     };
     
-    // Parallel: generate both tokens
     const [accessToken, refreshToken] = await Promise.all([
       Promise.resolve(this.jwtService.generateToken(tokenPayload)),
       Promise.resolve(this.jwtService.generateRefreshToken(tokenPayload))

@@ -15,7 +15,6 @@ export class RoleService {
   }
 
   private initializeCache(): void {
-    // Pre-warm cache on initialization
     this.getAllRoles().catch(err => 
       this.logger.error("Error warming role cache:", err)
     );
@@ -24,12 +23,10 @@ export class RoleService {
   async getRole(name: string, organizationId: string = "default"): Promise<IRole | null> {
     const cacheKey = `${name}:${organizationId}`;
     
-    // Check cache first
     if (this.roleCache.has(cacheKey) && this.isCacheValid()) {
       return this.roleCache.get(cacheKey) || null;
     }
     
-    // Cache miss or expired - query DB
     const role = await this.roleRepository.findByName(name, organizationId);
     if (role) {
       this.roleCache.set(cacheKey, role);
@@ -43,7 +40,6 @@ export class RoleService {
   }
 
   async getAllRoles(organizationId: string = "default"): Promise<IRole[]> {
-    // Check if cache is still valid
     if (this.roleCache.size > 0 && this.isCacheValid()) {
       const cached = Array.from(this.roleCache.values()).filter(
         r => r.organizationId === organizationId
@@ -53,10 +49,8 @@ export class RoleService {
       }
     }
     
-    // Cache miss or expired - query DB
     const roles = await this.roleRepository.findAll(organizationId);
     
-    // Update cache
     roles.forEach(role => {
       const cacheKey = `${role.name}:${organizationId}`;
       this.roleCache.set(cacheKey, role);

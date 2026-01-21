@@ -21,7 +21,6 @@ export interface IJwtService {
 @injectable()
 export class JwtService implements IJwtService {
   generateToken(payload: ITokenPayload): string {
-    // Use payload directly, adding defaults inline
     return jwt.sign(
       {
         userId: payload.userId,
@@ -41,7 +40,6 @@ export class JwtService implements IJwtService {
   }
 
   generateRefreshToken(payload: ITokenPayload): string {
-    // Use payload directly, adding defaults inline
     return jwt.sign(
       {
         userId: payload.userId,
