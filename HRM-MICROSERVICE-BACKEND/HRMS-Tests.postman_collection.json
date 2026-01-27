@@ -27,8 +27,23 @@
       "type": "string"
     },
     {
-      "key": "base_url",
-      "value": "http://localhost:3001",
+      "key": "auth_url",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "employee_url",
+      "value": "http://localhost:5002",
+      "type": "string"
+    },
+    {
+      "key": "attendance_url",
+      "value": "http://localhost:5003",
+      "type": "string"
+    },
+    {
+      "key": "leave_url",
+      "value": "http://localhost:5004",
       "type": "string"
     }
   ],
@@ -287,10 +302,10 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/auth/validate-token",
+              "raw": "{{auth_url}}/auth/validate-token",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3001",
+              "port": "5001",
               "path": ["auth", "validate-token"]
             }
           }
@@ -306,10 +321,10 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/auth/current-user",
+              "raw": "{{auth_url}}/auth/current-user",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3001",
+              "port": "5001",
               "path": ["auth", "current-user"]
             }
           }
@@ -325,10 +340,10 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/auth/logout",
+              "raw": "{{auth_url}}/auth/logout",
               "protocol": "http",
               "host": ["localhost"],
-              "port": "3001",
+              "port": "5001",
               "path": ["auth", "logout"]
             }
           }
@@ -1051,6 +1066,279 @@
                   "value": "2026-01-31"
                 }
               ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave Service - RBAC Tests",
+      "item": [
+        {
+          "name": "1. Employee - Request Leave (Permission: create:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"employee_id_here\",\n  \"leaveType\": \"Paid Leave\",\n  \"startDate\": \"2026-02-01\",\n  \"endDate\": \"2026-02-05\",\n  \"numberOfDays\": 5,\n  \"reason\": \"Personal work\",\n  \"attachmentUrl\": \"https://example.com/attachment.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{leave_url}}/leaves",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves"]
+            }
+          }
+        },
+        {
+          "name": "2. Manager - Request Leave (Permission: create:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"employee_id_here\",\n  \"leaveType\": \"Paid Leave\",\n  \"startDate\": \"2026-02-10\",\n  \"endDate\": \"2026-02-12\",\n  \"numberOfDays\": 3,\n  \"reason\": \"Medical appointment\",\n  \"attachmentUrl\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{leave_url}}/leaves",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves"]
+            }
+          }
+        },
+        {
+          "name": "3. HR - Get All Leaves (Permission: read:leave)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{leave_url}}/leaves?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Manager - Get All Leaves (Permission: read:leave)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{leave_url}}/leaves?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Employee - Get Leave by Employee ID (Permission: read:leave)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{leave_url}}/leaves/employee/employee_id_here?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves", "employee", "employee_id_here"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. HR - Approve Leave (Permission: approve:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"approverComments\": \"Approved as per policy\"\n}"
+            },
+            "url": {
+              "raw": "{{leave_url}}/leaves/leave_id_here/approve",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves", "leave_id_here", "approve"]
+            }
+          }
+        },
+        {
+          "name": "7. Manager - Approve Leave (Permission: approve:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"approverComments\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "{{leave_url}}/leaves/leave_id_here/approve",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves", "leave_id_here", "approve"]
+            }
+          }
+        },
+        {
+          "name": "8. Employee - Approve Leave (Should FAIL - No Permission)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"approverComments\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "{{leave_url}}/leaves/leave_id_here/approve",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves", "leave_id_here", "approve"]
+            }
+          }
+        },
+        {
+          "name": "9. HR - Update Leave (Permission: update:leave)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveType\": \"Casual Leave\",\n  \"reason\": \"Updated reason\"\n}"
+            },
+            "url": {
+              "raw": "{{leave_url}}/leaves/leave_id_here",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves", "leave_id_here"]
+            }
+          }
+        },
+        {
+          "name": "10. Admin - Delete Leave (Permission: delete:leave)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{leave_url}}/leaves/leave_id_here",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5004",
+              "path": ["leaves", "leave_id_here"]
             }
           }
         }
