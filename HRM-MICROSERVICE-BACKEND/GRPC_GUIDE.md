@@ -14,24 +14,24 @@ The HRMS system uses gRPC for efficient inter-service communication between the 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│           Client Applications               │
-└────────────────┬────────────────────────────┘
-                 │
-        ┌────────┴─────────┐
-        │                  │
-    HTTP API           HTTP API
-        │                  │
-┌───────▼─────────┐  ┌────▼─────────┐
-│  Auth Service   │  │Employee Service
-│   Port 3001     │  │   Port 3002
-│   gRPC 5001     │  │   gRPC 5002
-└────────┬────────┘  └────┬──────────┘
-         │                │
-         └────────┬───────┘
-                  │
-            gRPC Inter-service
-            Communication
+          ┌─────────────────────────────────────────────┐
+          │           Client Applications               │
+          └──────────────────┬──────────────────────────┘
+                             │
+        ┌──────────────────┌─┴──────────────────────────┐
+        │                  │                          | 
+    HTTP API           HTTP API                   HTTP API
+        │                  │                          |
+┌───────▼─────────┐  ┌────▼─────────┐         ┌───────▼─────────┐
+│  Auth Service   │  │Employee Service        |Attendance Service
+│   Port 3001     │  │   Port 3002            |    port 3003
+│   gRPC 5001     │  │   gRPC 5002            |    gRPC 5003
+└────────┬────────┘  └──────┬────────┘        └──────────┬──────┘
+         │                  |                            |
+         |                  |                            |
+         └──────────────────┬────────────────────────────┘
+                    gRPC Inter-service
+                      Communication
 ```
 
 ## Service Ports
@@ -43,6 +43,10 @@ The HRMS system uses gRPC for efficient inter-service communication between the 
 ### Employee Service
 - **HTTP API**: `3002`
 - **gRPC Server**: `5002`
+
+### Attendance Servie
+- **HTTP API**: `3003`
+- **gRPC Server**: `5003`
 
 ## Proto Definitions
 
@@ -76,6 +80,20 @@ service EmployeeService {
   rpc GetEmployeeByEmail (GetEmployeeByEmailRequest) returns (EmployeeResponse) {}
 }
 ```
+### Attendance Service Proto
+File: `attendance.proto`
+
+```protobuf
+service AttendanceService {
+  rpc CreateEmployee (CreateEmployeeRequest) returns (EmployeeResponse) {}
+  rpc GetEmployeeById (GetEmployeeByIdRequest) returns (EmployeeResponse) {}
+  rpc GetAllEmployees (GetAllEmployeesRequest) returns (EmployeeListResponse) {}
+  rpc UpdateEmployee (UpdateEmployeeRequest) returns (EmployeeResponse) {}
+  rpc DeleteEmployee (DeleteEmployeeRequest) returns (DeleteEmployeeResponse) {}
+  rpc GetEmployeeByEmail (GetEmployeeByEmailRequest) returns (EmployeeResponse) {}
+}
+```
+
 
 ## Implementation Details
 

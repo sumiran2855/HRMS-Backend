@@ -37,7 +37,7 @@ export class EmployeeGrpcClient {
         this.employeeServiceUrl,
         grpc.credentials.createInsecure()
       );
-      await this.healthCheck();
+      // await this.healthCheck();
       this.isHealthy = true;
       logger.info(`Connected to Employee Service at ${this.employeeServiceUrl}`);
     } catch (error) {
