@@ -9,14 +9,13 @@ export class AuthGrpcImpl {
   constructor(@inject(RoleService) private roleService: RoleService) {}
   async register(call: any, callback: any) {
     try {
-      const { email, username, password, fullName } = call.request;
+      const { email, password, fullName } = call.request;
 
       callback(null, {
         success: true,
         message: 'User registered successfully',
         data: {
           userId: 'user_' + Date.now(),
-          username,
           email,
           accessToken: 'access_token_' + Date.now(),
           refreshToken: 'refresh_token_' + Date.now(),
@@ -41,7 +40,6 @@ export class AuthGrpcImpl {
         message: 'Login successful',
         data: {
           userId: 'user_' + Date.now(),
-          username: email.split('@')[0],
           email,
           accessToken: 'access_token_' + Date.now(),
           refreshToken: 'refresh_token_' + Date.now(),
@@ -67,7 +65,6 @@ export class AuthGrpcImpl {
         message: 'Token is valid',
         userData: {
           id: 'user_123',
-          username: 'testuser',
           email: 'test@example.com',
           fullName: 'Test User',
           createdAt: Date.now(),
@@ -92,7 +89,6 @@ export class AuthGrpcImpl {
         message: 'Token refreshed successfully',
         data: {
           userId: 'user_' + Date.now(),
-          username: 'testuser',
           email: 'test@example.com',
           accessToken: 'access_token_' + Date.now(),
           refreshToken: 'refresh_token_' + Date.now(),
@@ -117,7 +113,6 @@ export class AuthGrpcImpl {
         message: 'User retrieved successfully',
         data: {
           id: userId,
-          username: 'testuser',
           email: 'test@example.com',
           fullName: 'Test User',
           createdAt: Date.now(),
@@ -135,7 +130,7 @@ export class AuthGrpcImpl {
 
   async verifyUserExists(call: any, callback: any) {
     try {
-      const { email, username } = call.request;
+      const { email } = call.request;
 
       callback(null, {
         success: true,

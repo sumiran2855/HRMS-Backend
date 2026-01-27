@@ -3,7 +3,7 @@ import { RoleEnum } from "../entities/Role.entity";
 
 export interface IUser extends Document {
   email: string;
-  username: string;
+  username?: string;
   password: string;
   fullName: string;
   role: string;
@@ -24,8 +24,8 @@ const UserSchema = new Schema<IUser>(
     },
     username: {
       type: String,
-      required: true,
-      unique: true,
+      required: false,
+      sparse: true,
       trim: true,
     },
     password: {

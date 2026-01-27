@@ -9,7 +9,9 @@
     "employee:dev": "cd services/employee-service && npm run dev",
     "employee:build": "cd services/employee-service && npm run build",
     "attendance:dev": "cd services/attendance-service && npm run dev",
-    "attendance:build": "cd services/attendance-service && npm run build"
+    "attendance:build": "cd services/attendance-service && npm run build",
+    "leave:dev": "cd services/leave-service && npm run dev",
+    "leave:build": "cd services/leave-service && npm run build"
   },
   "author": "dev.sandeep",
   "license": "ISC"

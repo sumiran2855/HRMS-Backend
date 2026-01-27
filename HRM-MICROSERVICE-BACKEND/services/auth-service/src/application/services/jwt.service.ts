@@ -5,7 +5,6 @@ import { envConfig } from "../../config/env.config";
 export interface ITokenPayload {
   userId: string;
   email: string;
-  username: string;
   organizationId?: string;
   role?: string;
   permissions?: string[];
@@ -25,7 +24,6 @@ export class JwtService implements IJwtService {
       {
         userId: payload.userId,
         email: payload.email,
-        username: payload.username,
         organizationId: payload.organizationId || 'default',
         role: payload.role || 'employee',
         permissions: payload.permissions || [],
@@ -44,7 +42,6 @@ export class JwtService implements IJwtService {
       {
         userId: payload.userId,
         email: payload.email,
-        username: payload.username,
         organizationId: payload.organizationId || 'default',
         role: payload.role || 'employee',
         permissions: payload.permissions || [],

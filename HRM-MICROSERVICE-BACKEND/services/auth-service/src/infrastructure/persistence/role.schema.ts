@@ -1,7 +1,9 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 import { IRole } from "../../domain/entities/Role.entity";
 
-export interface IRoleDocument extends IRole, Document {}
+export interface IRoleDocument extends Omit<IRole, '_id'>, Document {
+  _id: Types.ObjectId;
+}
 
 const RoleSchema = new Schema<IRoleDocument>(
   {

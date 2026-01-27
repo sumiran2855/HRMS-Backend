@@ -20,15 +20,15 @@ export class AuthGrpcImpl {
     callback: grpc.sendUnaryData<any>
   ): Promise<void> {
     try {
-      const { email, username, password, fullName } = call.request;
+      const { email, password, fullName,role } = call.request;
 
       logger.debug('gRPC: Registering user', email);
 
       const result = await this.authService.register(
         email,
-        username,
         password,
-        fullName
+        fullName,
+        role
       );
 
       callback(null, {
@@ -159,16 +159,13 @@ export class AuthGrpcImpl {
     callback: grpc.sendUnaryData<any>
   ): Promise<void> {
     try {
-      const { email, username } = call.request;
+      const { email } = call.request;
 
-      logger.debug('gRPC: Verifying user exists', email || username);
+      logger.debug('gRPC: Verifying user exists', email);
 
       let exists = false;
       if (email) {
         const user = await this.userRepository.findByEmail(email);
-        exists = !!user;
-      } else if (username) {
-        const user = await this.userRepository.findByUsername(username);
         exists = !!user;
       }
 

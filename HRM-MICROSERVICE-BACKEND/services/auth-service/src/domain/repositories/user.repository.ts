@@ -5,7 +5,6 @@ export interface IUserRepository {
   create(userData: Partial<IUser>): Promise<IUser>;
   findById(id: string): Promise<IUser | null>;
   findByEmail(email: string): Promise<IUser | null>;
-  findByUsername(username: string): Promise<IUser | null>;
   update(id: string, userData: Partial<IUser>): Promise<IUser | null>;
   delete(id: string): Promise<boolean>;
 }
@@ -23,10 +22,6 @@ export class UserRepository implements IUserRepository {
 
   async findByEmail(email: string): Promise<IUser | null> {
     return User.findOne({ email }).select("+password").exec() as Promise<IUser | null>;
-  }
-
-  async findByUsername(username: string): Promise<IUser | null> {
-    return User.findOne({ username });
   }
 
   async update(id: string, userData: Partial<IUser>): Promise<IUser | null> {

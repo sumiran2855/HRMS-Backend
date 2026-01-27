@@ -5,7 +5,7 @@ export class LoginRequest {
 
 export class RegisterRequest {
   email!: string;
-  username!: string;
+  // username!: string;
   password!: string;
   fullName!: string;
   role!: string;

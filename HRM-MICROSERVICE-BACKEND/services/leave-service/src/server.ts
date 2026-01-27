@@ -10,7 +10,7 @@ const logger = new Logger('Server');
 
 async function bootstrap() {
   try {
-    logger.info(`Starting Attendance Service in ${envConfig.nodeEnv} environment...`);
+    logger.info(`Starting Leave Service in ${envConfig.nodeEnv} environment...`);
 
     logger.info("Initializing database connection...");
     await initializeDatabase();
@@ -19,65 +19,54 @@ async function bootstrap() {
     const container = buildContainer();
     logger.info('✓ DI container initialized');
 
-    const app = createApp();
+    const app = createApp(container);
 
     const server = app.listen(envConfig.port, () => {
       logger.info(`✓ Server listening on port ${envConfig.port}`);
       logger.info(`✓ Environment: ${envConfig.nodeEnv}`);
-      logger.info('✓ Attendance Service is ready!');
+      logger.info('✓ Leave Service is ready!');
     });
 
-    const grpcPort = envConfig.grpcAttendancePort || 5003;
+    const grpcPort = envConfig.grpcPort || 5004;
     logger.info(`Initializing gRPC server on port ${grpcPort}...`);
     
     initializeGrpcServer();
     
-    const proto = loadProtoDefinition("attendance.proto");
+    const proto = loadProtoDefinition("leave.proto");
+    const leaveProto = proto.leave || proto;
     
-    registerService(getGrpcServer(), proto, "attendance.AttendanceService", {      
-      createAttendance: (call: any, callback: any) => {
+    registerService(getGrpcServer(), proto, "leave.LeaveService", {      
+      createLeave: (call: any, callback: any) => {
         callback({
           code: 12,
           details: "Not implemented",
         });
       },
-      getAttendanceById: (call: any, callback: any) => {
+      getLeaveById: (call: any, callback: any) => {
         callback({
           code: 12,
           details: "Not implemented",
         });
       },
-      getAllAttendances: (call: any, callback: any) => {
+      getLeaveByEmployeeId: (call: any, callback: any) => {
         callback({
           code: 12,
           details: "Not implemented",
         });
       },
-      updateAttendance: (call: any, callback: any) => {
+      getAllLeaves: (call: any, callback: any) => {
         callback({
           code: 12,
           details: "Not implemented",
         });
       },
-      deleteAttendance: (call: any, callback: any) => {
+      updateLeave: (call: any, callback: any) => {
         callback({
           code: 12,
           details: "Not implemented",
         });
       },
-      getAttendanceByDateRange: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
-      approveAttendance: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
-      getAttendanceSummary: (call: any, callback: any) => {
+      deleteLeave: (call: any, callback: any) => {
         callback({
           code: 12,
           details: "Not implemented",

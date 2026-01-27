@@ -65,7 +65,34 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
+  # Attendance Service
+  attendance-service:
+    build:
+      context: .
+      dockerfile: ./services/attendance-service/Dockerfile
+    container_name: hrms-attendance-service
+    ports:
+      - "3003:3003"      # HTTP API
+      - "5003:5003"      # gRPC
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      GRPC_AUTH_PORT: 5001
+      GRPC_EMPLOYEE_PORT: 5002
+      AUTH_SERVICE_GRPC_URL: auth-service:5001
+      EMPLOYEE_SERVICE_GRPC_URL: employee-service:5002
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/hrms-attendance?authSource=admin
+    depends_on:
+      - mongodb
+      - auth-service
+      - employee-service
+    networks:
+      - hrms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 volumes:
   mongodb_data:
 

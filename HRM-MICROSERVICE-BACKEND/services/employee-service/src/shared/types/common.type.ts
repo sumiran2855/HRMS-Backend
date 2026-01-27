@@ -19,7 +19,7 @@ export interface AuthenticatedRequest extends Express.Request {
   user?: {
     userId: string;
     email: string;
-    username: string;
+    username?: string;
   };
   id?: string;
 }
@@ -27,5 +27,5 @@ export interface AuthenticatedRequest extends Express.Request {
 export interface TokenPayload {
   userId: string;
   email: string;
-  username: string;
+  username?: string;
 }

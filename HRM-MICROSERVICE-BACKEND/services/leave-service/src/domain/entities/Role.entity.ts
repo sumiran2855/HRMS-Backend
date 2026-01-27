@@ -1,7 +1,5 @@
-import { Document, Types } from "mongoose";
-
 export interface IRole {
-  _id?: string | Types.ObjectId;
+  _id?: string;
   name: string;
   description: string;
   permissions: string[];
@@ -36,6 +34,11 @@ export enum PermissionEnum {
   UPDATE_ATTENDANCE = "update:attendance",
   DELETE_ATTENDANCE = "delete:attendance",
   APPROVE_ATTENDANCE = "approve:attendance",
+  CREATE_LEAVE = "create:leave",
+  READ_LEAVE = "read:leave",
+  UPDATE_LEAVE = "update:leave",
+  DELETE_LEAVE = "delete:leave",
+  APPROVE_LEAVE = "approve:leave",
   CREATE_USER = "create:user",
   READ_USER = "read:user",
   UPDATE_USER = "update:user",
@@ -53,57 +56,46 @@ export const DEFAULT_ROLES = {
   },
   [RoleEnum.ADMIN]: {
     name: RoleEnum.ADMIN,
-    description: "Administrator with full organizational access",
+    description: "Administrator with most system access",
+    permissions: Object.values(PermissionEnum),
+  },
+  [RoleEnum.HR]: {
+    name: RoleEnum.HR,
+    description: "HR Manager",
     permissions: [
       PermissionEnum.CREATE_EMPLOYEE,
       PermissionEnum.READ_EMPLOYEE,
       PermissionEnum.UPDATE_EMPLOYEE,
       PermissionEnum.DELETE_EMPLOYEE,
-      PermissionEnum.CREATE_ATTENDANCE,
       PermissionEnum.READ_ATTENDANCE,
-      PermissionEnum.UPDATE_ATTENDANCE,
       PermissionEnum.APPROVE_ATTENDANCE,
-      PermissionEnum.CREATE_USER,
-      PermissionEnum.READ_USER,
-      PermissionEnum.UPDATE_USER,
-      PermissionEnum.DELETE_USER,
-      PermissionEnum.MANAGE_ROLES,
-      PermissionEnum.VIEW_REPORTS,
-      PermissionEnum.EXPORT_DATA,
-    ],
-  },
-  [RoleEnum.HR]: {
-    name: RoleEnum.HR,
-    description: "HR Personnel with employee and attendance management",
-    permissions: [
-      PermissionEnum.CREATE_EMPLOYEE,
-      PermissionEnum.READ_EMPLOYEE,
-      PermissionEnum.UPDATE_EMPLOYEE,
-      PermissionEnum.CREATE_ATTENDANCE,
-      PermissionEnum.READ_ATTENDANCE,
-      PermissionEnum.UPDATE_ATTENDANCE,
-      PermissionEnum.APPROVE_ATTENDANCE,
+      PermissionEnum.READ_LEAVE,
+      PermissionEnum.APPROVE_LEAVE,
       PermissionEnum.VIEW_REPORTS,
       PermissionEnum.EXPORT_DATA,
     ],
   },
   [RoleEnum.MANAGER]: {
     name: RoleEnum.MANAGER,
-    description: "Manager with team oversight access",
+    description: "Team Manager",
     permissions: [
       PermissionEnum.READ_EMPLOYEE,
       PermissionEnum.READ_ATTENDANCE,
-      PermissionEnum.UPDATE_ATTENDANCE,
+      PermissionEnum.APPROVE_ATTENDANCE,
+      PermissionEnum.READ_LEAVE,
+      PermissionEnum.APPROVE_LEAVE,
       PermissionEnum.VIEW_REPORTS,
     ],
   },
   [RoleEnum.EMPLOYEE]: {
     name: RoleEnum.EMPLOYEE,
-    description: "Regular Employee with limited access",
+    description: "Regular Employee",
     permissions: [
       PermissionEnum.READ_EMPLOYEE,
-      PermissionEnum.CREATE_ATTENDANCE,
-      PermissionEnum.READ_ATTENDANCE,
+      PermissionEnum.CREATE_LEAVE,
+      PermissionEnum.READ_LEAVE,
+      PermissionEnum.UPDATE_LEAVE,
+      PermissionEnum.VIEW_REPORTS,
     ],
   },
 };

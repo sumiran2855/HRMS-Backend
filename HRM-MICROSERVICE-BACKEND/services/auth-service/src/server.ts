@@ -1,39 +1,30 @@
-import "reflect-metadata";
-import { createApp } from "./app";
-import { initializeDatabase } from "./bootstrap/db.bootstrap";
-import { initializeGrpcServer, startGrpcServer, loadProtoDefinition, shutdownGrpcServer, registerService, getGrpcServer } from "./bootstrap/grpc.bootstrap";
-import { buildContainer } from "./bootstrap/container.bootstrap";
-import { initializeDefaultRoles } from "./bootstrap/role.initializer";
-import { AuthGrpcImpl } from "./infrastructure/grpc/auth.grpc.impl";
-import { EmployeeGrpcClient } from "./infrastructure/grpc/employee.grpc.client";
-import { RoleService } from "./application/services/role.service";
-import { envConfig } from "./config/env.config";
-import { Logger } from "./shared/utils/logger.util";
+import 'reflect-metadata';
+import { createApp } from './app';
+import { initializeDatabase } from './bootstrap/db.bootstrap';
+import { buildContainer } from './bootstrap/container.bootstrap';
+import { initializeGrpcServer, startGrpcServer, shutdownGrpcServer, loadProtoDefinition, registerService, getGrpcServer } from './bootstrap/grpc.bootstrap';
+import { envConfig } from './config/env.config';
+import { Logger } from './shared/utils/logger.util';
 
-const logger = new Logger("Server");
+const logger = new Logger('Server');
 
-async function bootstrap(): Promise<void> {
+async function bootstrap() {
   try {
     logger.info(`Starting Auth Service in ${envConfig.nodeEnv} environment...`);
 
     logger.info("Initializing database connection...");
     await initializeDatabase();
-    logger.info("✓ Database connected successfully");
+    logger.info('✓ Database connected successfully');
 
     const container = buildContainer();
-    logger.info("✓ Dependency injection container built");
-
-    logger.info("Initializing default roles...");
-    const roleService = container.get<RoleService>(RoleService);
-    await initializeDefaultRoles(roleService);
-    logger.info("✓ Default roles initialized");
+    logger.info('✓ DI container initialized');
 
     const app = createApp();
 
-    const port = envConfig.port || 3001;
-    const server = app.listen(port, () => {
-      logger.info(`✓ Auth Service HTTP server running on port ${port}`);
-      logger.info(`✓ Health check: http://localhost:${port}/health`);
+    const server = app.listen(envConfig.port, () => {
+      logger.info(`✓ Server listening on port ${envConfig.port}`);
+      logger.info(`✓ Environment: ${envConfig.nodeEnv}`);
+      logger.info('✓ Auth Service is ready!');
     });
 
     const grpcPort = envConfig.grpcAuthPort || 5001;
@@ -41,22 +32,39 @@ async function bootstrap(): Promise<void> {
     
     initializeGrpcServer();
     
-    const employeeClient = container.get<EmployeeGrpcClient>(EmployeeGrpcClient);
-    await employeeClient.initialize();
-    logger.info("✓ gRPC clients initialized");
-
-    const authGrpcImpl = container.get<AuthGrpcImpl>(AuthGrpcImpl);
     const proto = loadProtoDefinition("auth.proto");
     
-    registerService(getGrpcServer(), proto, "auth.AuthService", {
-      register: (call: any, callback: any) => authGrpcImpl.register(call, callback),
-      login: (call: any, callback: any) => authGrpcImpl.login(call, callback),
-      validateToken: (call: any, callback: any) => authGrpcImpl.validateToken(call, callback),
-      refreshToken: (call: any, callback: any) => authGrpcImpl.refreshToken(call, callback),
-      getCurrentUser: (call: any, callback: any) => authGrpcImpl.getCurrentUser(call, callback),
-      verifyUserExists: (call: any, callback: any) => authGrpcImpl.verifyUserExists(call, callback),
-      getRoleByName: (call: any, callback: any) => authGrpcImpl.getRoleByName(call, callback),
-      getAllRoles: (call: any, callback: any) => authGrpcImpl.getAllRoles(call, callback),
+    registerService(getGrpcServer(), proto, "auth.AuthService", {      
+      register: (call: any, callback: any) => {
+        callback({
+          code: 12,
+          details: "Not implemented",
+        });
+      },
+      login: (call: any, callback: any) => {
+        callback({
+          code: 12,
+          details: "Not implemented",
+        });
+      },
+      validateToken: (call: any, callback: any) => {
+        callback({
+          code: 12,
+          details: "Not implemented",
+        });
+      },
+      refreshToken: (call: any, callback: any) => {
+        callback({
+          code: 12,
+          details: "Not implemented",
+        });
+      },
+      getCurrentUser: (call: any, callback: any) => {
+        callback({
+          code: 12,
+          details: "Not implemented",
+        });
+      },
     });
     
     await startGrpcServer(grpcPort);
@@ -69,9 +77,8 @@ async function bootstrap(): Promise<void> {
         logger.info("HTTP server closed");
 
         try {
-          await employeeClient.close();
           await shutdownGrpcServer();
-          logger.info("✓ All resources cleaned up");
+          logger.info("All resources cleaned up");
           process.exit(0);
         } catch (error) {
           logger.error("Error during shutdown", error);
@@ -85,8 +92,8 @@ async function bootstrap(): Promise<void> {
       }, 30000);
     };
 
-    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     process.on("uncaughtException", (error) => {
       logger.error("Uncaught Exception", error);
@@ -97,8 +104,9 @@ async function bootstrap(): Promise<void> {
       logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
       process.exit(1);
     });
+
   } catch (error) {
-    logger.error("Failed to start server", error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 }

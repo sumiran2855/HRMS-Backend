@@ -9,7 +9,7 @@ import { ITokenBlacklistService } from "./token-blacklist.service";
 export interface IAuthService {
   register(
     email: string,
-    username: string,
+    // username: string,
     password: string,
     fullName: string,
     role?: string
@@ -34,7 +34,6 @@ export class AuthService implements IAuthService {
 
   async register(
     email: string,
-    username: string,
     password: string,
     fullName: string,
     role: string,
@@ -44,10 +43,10 @@ export class AuthService implements IAuthService {
       throw new Error("User with this email already exists");
     }
 
-    const existingUsername = await this.userRepository.findByUsername(username);
-    if (existingUsername) {
-      throw new Error("Username already taken");
-    }
+    // const existingUsername = await this.userRepository.findByUsername(username);
+    // if (existingUsername) {
+    //   throw new Error("Username already taken");
+    // }
 
     const userRole = await this.roleService.getRoleByName(role);
     if (!userRole) {
@@ -56,7 +55,7 @@ export class AuthService implements IAuthService {
 
     const user = await this.userRepository.create({
       email,
-      username,
+      // username,
       password,
       fullName,
       role: userRole.name,
@@ -65,7 +64,6 @@ export class AuthService implements IAuthService {
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
-      username: user.username,
       organizationId: "default",
       role: userRole.name,
       permissions: userRole.permissions,
@@ -79,7 +77,6 @@ export class AuthService implements IAuthService {
       user: {
         id: user._id,
         email: user.email,
-        username: user.username,
         fullName: user.fullName,
         role: userRole.name,
       },
@@ -114,7 +111,6 @@ export class AuthService implements IAuthService {
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
-      username: user.username,
       organizationId: "default",
       role: userRole.name,
       permissions: userRole.permissions,
@@ -130,7 +126,6 @@ export class AuthService implements IAuthService {
       user: {
         id: user._id,
         email: user.email,
-        username: user.username,
         fullName: user.fullName,
         role: userRole.name,
       },
@@ -148,7 +143,6 @@ export class AuthService implements IAuthService {
     const newAccessToken = this.jwtService.generateToken({
       userId: payload.userId,
       email: payload.email,
-      username: payload.username,
       organizationId: payload.organizationId,
       role: payload.role,
       permissions: userRole?.permissions || [],
@@ -185,7 +179,6 @@ export class AuthService implements IAuthService {
     return {
       id: user._id,
       email: user.email,
-      username: user.username,
       fullName: user.fullName,
       isActive: user.isActive,
     };

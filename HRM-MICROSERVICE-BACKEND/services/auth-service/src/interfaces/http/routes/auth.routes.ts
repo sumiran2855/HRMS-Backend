@@ -22,7 +22,7 @@ export function registerAuthRoutes(
   router.post(
     "/register",
     trimRequestBody,
-    validateRequestBody(["email", "username", "password", "fullName","role"]),
+    validateRequestBody(["email", "password", "fullName","role"]),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const authController = container.get<AuthController>(AuthController);

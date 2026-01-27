@@ -22,16 +22,16 @@ export class AuthController {
 
     try {
       this.logger.debug(`[${requestId}] Register request:`, {
-        email: req.body.email,
-        username: req.body.username,
+        email: req.body.email
+        // username: req.body.username,
       });
 
-      const { email, username, password, fullName, role } =
+      const { email, password, fullName, role } =
         req.body as RegisterRequest;
 
       const result = await this.authService.register(
         email,
-        username,
+        // username,
         password,
         fullName,
         role
