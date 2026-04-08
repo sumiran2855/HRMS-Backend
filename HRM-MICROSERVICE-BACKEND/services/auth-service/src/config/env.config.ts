@@ -12,4 +12,7 @@ export const envConfig = {
   jwtRefreshExpiration: parseInt(process.env.JWT_REFRESH_EXPIRES_IN || "86400"),
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || "10"),
   nodeEnv: process.env.NODE_ENV || "development",
+  
+  // gRPC service endpoints
+  employeeServiceUrl: process.env.EMPLOYEE_SERVICE_URL || "localhost:5002",
 };

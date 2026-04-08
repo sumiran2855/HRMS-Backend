@@ -17,7 +17,7 @@ export function loadProtoDefinition(protoFileName: string) {
   try {
     const protoPath = path.join(
       __dirname,
-      "../../..",
+      "../../",
       "proto",
       protoFileName
     );

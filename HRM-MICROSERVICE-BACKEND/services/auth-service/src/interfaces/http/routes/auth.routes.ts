@@ -106,6 +106,6 @@ export function registerAuthRoutes(
     }
   );
 
-  app.use("/auth", router);
+  app.use("/api/auth", router);
   logger.info("✓ Auth routes registered successfully");
 }

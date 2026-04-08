@@ -8,4 +8,8 @@ export const envConfig = {
     jwtSecret: process.env.JWT_SECRET || "default_secret_change_this",
     jwtExpiration: parseInt(process.env.JWT_EXPIRES_IN || "3600"),
     nodeEnv: process.env.NODE_ENV || "development",
+    
+    // gRPC service endpoints
+    authServiceUrl: process.env.AUTH_SERVICE_URL || "localhost:5001",
+    employeeServiceUrl: process.env.EMPLOYEE_SERVICE_URL || "localhost:5002",
 };

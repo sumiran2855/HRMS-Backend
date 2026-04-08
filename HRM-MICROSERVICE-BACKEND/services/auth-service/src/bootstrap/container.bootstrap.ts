@@ -29,6 +29,7 @@ import {
 import { AuthController } from "../interfaces/http/controllers/Auth.controller";
 import { AuthGrpcImpl } from "../infrastructure/grpc/auth.grpc.impl";
 import { EmployeeGrpcClient } from "../infrastructure/grpc/employee.grpc.client";
+import { envConfig } from "../config/env.config";
 
 export function buildContainer(): Container {
   const container = new Container();
@@ -71,10 +72,10 @@ export function buildContainer(): Container {
 
   container.bind<AuthController>(AuthController).toSelf();
 
+  const employeeGrpcClient = new EmployeeGrpcClient(envConfig.employeeServiceUrl);
   container
     .bind<EmployeeGrpcClient>(EmployeeGrpcClient)
-    .toSelf()
-    .inSingletonScope();
+    .toConstantValue(employeeGrpcClient);
 
   container
     .bind<AuthGrpcImpl>(AuthGrpcImpl)

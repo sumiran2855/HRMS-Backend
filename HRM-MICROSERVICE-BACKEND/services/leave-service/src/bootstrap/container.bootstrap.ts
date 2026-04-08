@@ -7,6 +7,10 @@ import { LeaveService, ILeaveService } from "../application/services/leave.servi
 import { LeaveBalanceService, ILeaveBalanceService } from "../application/services/leave-balance.service";
 import { LeaveTypeService, ILeaveTypeService } from "../application/services/leave-type.service";
 import { LeaveController } from "../interfaces/http/controllers/Leave.controller";
+import { AuthGrpcClient } from "../infrastructure/grpc/auth.grpc.client";
+import { EmployeeGrpcClient } from "../infrastructure/grpc/employee.grpc.client";
+import { LeaveGrpcImpl } from "../infrastructure/grpc/leave.grpc.impl";
+import { envConfig } from "../config/env.config";
 
 export function buildContainer(): Container {
   const container = new Container();
@@ -41,6 +45,23 @@ export function buildContainer(): Container {
 
   // Register controllers
   container.bind(LeaveController).toSelf().inSingletonScope();
+
+  // Register gRPC clients
+  const authGrpcClient = new AuthGrpcClient(envConfig.authServiceUrl);
+  container
+    .bind<AuthGrpcClient>(AuthGrpcClient)
+    .toConstantValue(authGrpcClient);
+
+  const employeeGrpcClient = new EmployeeGrpcClient(envConfig.employeeServiceUrl);
+  container
+    .bind<EmployeeGrpcClient>(EmployeeGrpcClient)
+    .toConstantValue(employeeGrpcClient);
+
+  // Register gRPC implementation
+  container
+    .bind<LeaveGrpcImpl>(LeaveGrpcImpl)
+    .toSelf()
+    .inSingletonScope();
 
   return container;
 }

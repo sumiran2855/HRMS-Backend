@@ -3,7 +3,7 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 import { Logger } from '../../shared/utils/logger.util';
 
-const logger = new Logger('AuthGrpcClient');
+const logger = new Logger('EmployeeGrpcClient');
 
 interface RetryOptions {
   maxRetries: number;
@@ -11,7 +11,7 @@ interface RetryOptions {
   timeoutMs: number;
 }
 
-export class AuthGrpcClient {
+export class EmployeeGrpcClient {
   private client: any;
   private isHealthy: boolean = false;
   private retryOptions: RetryOptions = {
@@ -21,15 +21,15 @@ export class AuthGrpcClient {
   };
 
   constructor(
-    private authServiceUrl: string = 'localhost:5001'
+    private employeeServiceUrl: string = 'localhost:5002'
   ) {}
 
   async initialize(): Promise<void> {
     try {
-      if(this.client && this.isHealthy) {
+      if (this.client && this.isHealthy) {
         return;
       }
-      const protoPath = path.join(__dirname, '../../../proto', 'auth.proto');
+      const protoPath = path.join(__dirname, '../../../proto', 'employee.proto');
       const packageDefinition = protoLoader.loadSync(
         protoPath,
         {
@@ -41,16 +41,15 @@ export class AuthGrpcClient {
         }
       );
 
-      const authProto: any = grpc.loadPackageDefinition(packageDefinition);
-      this.client = new authProto.auth.AuthService(
-        this.authServiceUrl,
+      const employeeProto: any = grpc.loadPackageDefinition(packageDefinition);
+      this.client = new employeeProto.employee.EmployeeService(
+        this.employeeServiceUrl,
         grpc.credentials.createInsecure()
       );
       this.isHealthy = true;
-      logger.info(`Connected to Auth Service at ${this.authServiceUrl}`);
+      logger.info(`Connected to Employee Service at ${this.employeeServiceUrl}`);
     } catch (error) {
-      this.isHealthy = false;
-      logger.error('Failed to initialize Auth gRPC client', error);
+      logger.error('Failed to initialize Employee gRPC client', error);
       throw error;
     }
   }
@@ -101,50 +100,24 @@ export class AuthGrpcClient {
     });
   }
 
-  async validateToken(token: string): Promise<boolean> {
-    try {
-      const response = await this.retryWithBackoff(
-        () => this.callWithTimeout(
-          (callback) => this.client.validateToken({ token }, callback),
-          'validateToken'
-        ),
-        'validateToken'
-      );
-      return (response as any)?.isValid || false;
-    } catch (error) {
-      logger.error('Token validation failed', error);
-      return false;
-    }
-  }
-
-  async getCurrentUser(userId: string): Promise<any> {
+  async getEmployeeById(id: string): Promise<any> {
     return this.retryWithBackoff(
       () => this.callWithTimeout(
-        (callback) => this.client.getCurrentUser({ userId }, callback),
-        'getCurrentUser'
+        (callback) => this.client.getEmployeeById({ id }, callback),
+        'getEmployeeById'
       ),
-      'getCurrentUser'
-    );
+      'getEmployeeById'
+    ).then((response:any) => response?.data);
   }
 
-  async getRoleByName(name: string, organizationId: string = 'default'): Promise<any> {
+  async getEmployeeByEmail(email: string): Promise<any> {
     return this.retryWithBackoff(
       () => this.callWithTimeout(
-        (callback) => this.client.getRoleByName({ name, organizationId }, callback),
-        'getRoleByName'
+        (callback) => this.client.getEmployeeByEmail({ email }, callback),
+        'getEmployeeByEmail'
       ),
-      'getRoleByName'
-    );
-  }
-
-  async getAllRoles(organizationId: string = 'default'): Promise<any[]> {
-    return this.retryWithBackoff(
-      () => this.callWithTimeout(
-        (callback) => this.client.getAllRoles({ organizationId }, callback),
-        'getAllRoles'
-      ),
-      'getAllRoles'
-    ) || [];
+      'getEmployeeByEmail'
+    ).then((response:any) => response?.data);
   }
 
   setRetryOptions(options: Partial<RetryOptions>): void {
@@ -159,7 +132,7 @@ export class AuthGrpcClient {
     return new Promise((resolve) => {
       if (this.client) {
         this.client.close();
-        logger.info('Closed Auth gRPC client connection');
+        logger.info('Closed Employee gRPC client connection');
         resolve();
       }
     });

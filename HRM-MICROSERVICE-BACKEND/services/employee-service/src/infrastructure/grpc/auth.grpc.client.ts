@@ -15,7 +15,7 @@ export class AuthGrpcClient {
 
   async initialize(): Promise<void> {
     try {
-      const protoPath = path.join(__dirname, '../../../../proto');
+      const protoPath = path.join(__dirname, '../../../proto');
       const packageDefinition = protoLoader.loadSync(
         path.join(protoPath, 'auth.proto'),
         {

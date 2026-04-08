@@ -26,7 +26,7 @@ export class AuthGrpcClient {
 
   async initialize(): Promise<void> {
     try {
-      if(this.client && this.isHealthy) {
+      if (this.client && this.isHealthy) {
         return;
       }
       const protoPath = path.join(__dirname, '../../../proto', 'auth.proto');
@@ -49,7 +49,6 @@ export class AuthGrpcClient {
       this.isHealthy = true;
       logger.info(`Connected to Auth Service at ${this.authServiceUrl}`);
     } catch (error) {
-      this.isHealthy = false;
       logger.error('Failed to initialize Auth gRPC client', error);
       throw error;
     }
@@ -101,50 +100,24 @@ export class AuthGrpcClient {
     });
   }
 
-  async validateToken(token: string): Promise<boolean> {
-    try {
-      const response = await this.retryWithBackoff(
-        () => this.callWithTimeout(
-          (callback) => this.client.validateToken({ token }, callback),
-          'validateToken'
-        ),
+  async validateToken(token: string): Promise<any> {
+    return this.retryWithBackoff(
+      () => this.callWithTimeout(
+        (callback) => this.client.validateToken({ token }, callback),
         'validateToken'
-      );
-      return (response as any)?.isValid || false;
-    } catch (error) {
-      logger.error('Token validation failed', error);
-      return false;
-    }
-  }
-
-  async getCurrentUser(userId: string): Promise<any> {
-    return this.retryWithBackoff(
-      () => this.callWithTimeout(
-        (callback) => this.client.getCurrentUser({ userId }, callback),
-        'getCurrentUser'
       ),
-      'getCurrentUser'
+      'validateToken'
     );
   }
 
-  async getRoleByName(name: string, organizationId: string = 'default'): Promise<any> {
+  async verifyUserExists(email: string): Promise<any> {
     return this.retryWithBackoff(
       () => this.callWithTimeout(
-        (callback) => this.client.getRoleByName({ name, organizationId }, callback),
-        'getRoleByName'
+        (callback) => this.client.verifyUserExists({ email }, callback),
+        'verifyUserExists'
       ),
-      'getRoleByName'
+      'verifyUserExists'
     );
-  }
-
-  async getAllRoles(organizationId: string = 'default'): Promise<any[]> {
-    return this.retryWithBackoff(
-      () => this.callWithTimeout(
-        (callback) => this.client.getAllRoles({ organizationId }, callback),
-        'getAllRoles'
-      ),
-      'getAllRoles'
-    ) || [];
   }
 
   setRetryOptions(options: Partial<RetryOptions>): void {

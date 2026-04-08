@@ -5,14 +5,23 @@ import { Logger } from '../../shared/utils/logger.util';
 
 const logger = new Logger('EmployeeGrpcClient');
 
+interface RetryOptions {
+  maxRetries: number;
+  retryDelayMs: number;
+  timeoutMs: number;
+}
+
 export class EmployeeGrpcClient {
   private client: any;
-  private channel: grpc.Channel | null = null;
+  private isHealthy: boolean = false;
+  private retryOptions: RetryOptions = {
+    maxRetries: 3,
+    retryDelayMs: 1000,
+    timeoutMs: 30000,
+  };
 
   constructor(
-    private employeeServiceUrl: string = 'localhost:5002',
-    private isHealthy: boolean = false
-
+    private employeeServiceUrl: string = 'localhost:5002'
   ) {}
 
   async initialize(): Promise<void> {
@@ -20,7 +29,7 @@ export class EmployeeGrpcClient {
       if (this.client && this.isHealthy) {
         return;
       }
-      const protoPath = path.join(__dirname, '../../../../proto', 'employee.proto');
+      const protoPath = path.join(__dirname, '../../../proto', 'employee.proto');
       const packageDefinition = protoLoader.loadSync(
         protoPath,
         {
@@ -37,7 +46,6 @@ export class EmployeeGrpcClient {
         this.employeeServiceUrl,
         grpc.credentials.createInsecure()
       );
-      // await this.healthCheck();
       this.isHealthy = true;
       logger.info(`Connected to Employee Service at ${this.employeeServiceUrl}`);
     } catch (error) {
@@ -46,72 +54,88 @@ export class EmployeeGrpcClient {
     }
   }
 
-  private async healthCheck(): Promise<void> {
+  private async retryWithBackoff<T>(
+    fn: () => Promise<T>,
+    operation: string
+  ): Promise<T> {
+    let lastError: any;
+    
+    for (let attempt = 0; attempt <= this.retryOptions.maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error;
+        if (attempt < this.retryOptions.maxRetries) {
+          const delay = this.retryOptions.retryDelayMs * Math.pow(2, attempt);
+          logger.warn(
+            `${operation} failed (attempt ${attempt + 1}/${this.retryOptions.maxRetries + 1}). Retrying in ${delay}ms...`,
+            error
+          );
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    logger.error(`${operation} failed after ${this.retryOptions.maxRetries + 1} attempts`, lastError);
+    throw lastError;
+  }
+
+  private callWithTimeout<T>(
+    fn: (callback: (err: any, result: T) => void) => void,
+    operation: string
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error(`Employee Service at ${this.employeeServiceUrl} is not responding`));
-      }, 5000);
+        reject(new Error(`${operation} timed out after ${this.retryOptions.timeoutMs}ms`));
+      }, this.retryOptions.timeoutMs);
 
-      this.client.getAllEmployees(
-        { filter: {} },
-        (err: any, response: any) => {
-          clearTimeout(timeout);
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
+      fn((err: any, result: T) => {
+        clearTimeout(timeout);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
         }
-      );
+      });
     });
   }
 
   async getEmployeeByEmail(email: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.client.getEmployeeByEmail(
-        { email },
-        (err: any, response: any) => {
-          if (err) {
-            logger.error('Failed to get employee by email', err);
-            reject(err);
-          } else {
-            resolve(response.data);
-          }
-        }
-      );
-    });
+    return this.retryWithBackoff(
+      () => this.callWithTimeout(
+        (callback) => this.client.getEmployeeByEmail({ email }, callback),
+        'getEmployeeByEmail'
+      ),
+      'getEmployeeByEmail'
+    );
   }
 
   async getEmployeeById(id: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.client.getEmployeeById(
-        { id },
-        (err: any, response: any) => {
-          if (err) {
-            logger.error('Failed to get employee by ID', err);
-            reject(err);
-          } else {
-            resolve(response.data);
-          }
-        }
-      );
-    });
+    return this.retryWithBackoff(
+      () => this.callWithTimeout(
+        (callback) => this.client.getEmployeeById({ id }, callback),
+        'getEmployeeById'
+      ),
+      'getEmployeeById'
+    );
   }
 
   async getAllEmployees(filter?: any): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      this.client.getAllEmployees(
-        { filter: filter || {} },
-        (err: any, response: any) => {
-          if (err) {
-            logger.error('Failed to get all employees', err);
-            reject(err);
-          } else {
-            resolve(response.data || []);
-          }
-        }
-      );
-    });
+    return this.retryWithBackoff(
+      () => this.callWithTimeout(
+        (callback) => this.client.getAllEmployees({ filter: filter || {} }, callback),
+        'getAllEmployees'
+      ),
+      'getAllEmployees'
+    ) || [];
+  }
+
+  setRetryOptions(options: Partial<RetryOptions>): void {
+    this.retryOptions = {
+      ...this.retryOptions,
+      ...options,
+    };
+    logger.info('gRPC retry options updated', this.retryOptions);
   }
 
   close(): Promise<void> {

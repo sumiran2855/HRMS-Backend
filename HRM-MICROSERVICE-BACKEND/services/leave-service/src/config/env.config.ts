@@ -8,7 +8,7 @@ const logger = new Logger("EnvConfig");
 export interface IEnvConfig {
   nodeEnv: string;
   port: number;
-  databaseUri: string;
+  mongodbUri: string;
   grpcPort: number;
   logLevel: string;
   jwtSecret: string;
@@ -18,7 +18,7 @@ export interface IEnvConfig {
 }
 
 const requiredEnvVars = [
-  "DATABASE_URI",
+  "MONGODB_URI",
   "JWT_SECRET",
 ];
 
@@ -33,13 +33,13 @@ const validateEnvVars = (): void => {
 export const envConfig: IEnvConfig = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: parseInt(process.env.PORT || "3004", 10),
-  databaseUri: process.env.DATABASE_URI || "mongodb://localhost:27017/leave_service",
+  mongodbUri: process.env.MONGODB_URI || "mongodb://localhost:27017/hrms-leave",
   grpcPort: parseInt(process.env.GRPC_PORT || "5004", 10),
   logLevel: process.env.LOG_LEVEL || "debug",
   jwtSecret: process.env.JWT_SECRET || "secret",
   corsOrigin: process.env.CORS_ORIGIN || "*",
-  authServiceUrl: process.env.AUTH_SERVICE_URL || "localhost:50051",
-  employeeServiceUrl: process.env.EMPLOYEE_SERVICE_URL || "localhost:50052",
+  authServiceUrl: process.env.AUTH_SERVICE_GRPC_URL || "localhost:5001",
+  employeeServiceUrl: process.env.EMPLOYEE_SERVICE_GRPC_URL || "localhost:5002",
 };
 
 validateEnvVars();

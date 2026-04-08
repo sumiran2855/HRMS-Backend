@@ -8,7 +8,7 @@ export async function initializeDatabase(): Promise<void> {
   try {
     logger.info("Initializing database connection...");
 
-    await mongoose.connect(envConfig.databaseUri, {
+    await mongoose.connect(envConfig.mongodbUri, {
       maxPoolSize: 10,
       minPoolSize: 5,
     });

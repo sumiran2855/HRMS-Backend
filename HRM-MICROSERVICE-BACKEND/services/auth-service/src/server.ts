@@ -3,6 +3,8 @@ import { createApp } from './app';
 import { initializeDatabase } from './bootstrap/db.bootstrap';
 import { buildContainer } from './bootstrap/container.bootstrap';
 import { initializeGrpcServer, startGrpcServer, shutdownGrpcServer, loadProtoDefinition, registerService, getGrpcServer } from './bootstrap/grpc.bootstrap';
+import { AuthGrpcImpl } from './infrastructure/grpc/auth.grpc.impl';
+import { EmployeeGrpcClient } from './infrastructure/grpc/employee.grpc.client';
 import { envConfig } from './config/env.config';
 import { Logger } from './shared/utils/logger.util';
 
@@ -19,6 +21,11 @@ async function bootstrap() {
     const container = buildContainer();
     logger.info('✓ DI container initialized');
 
+    // Initialize gRPC clients before creating proto definitions
+    const employeeGrpcClient = container.get<EmployeeGrpcClient>(EmployeeGrpcClient);
+    await employeeGrpcClient.initialize();
+    logger.info('✓ Employee gRPC client initialized');
+
     const app = createApp();
 
     const server = app.listen(envConfig.port, () => {
@@ -32,39 +39,18 @@ async function bootstrap() {
     
     initializeGrpcServer();
     
+    const authGrpcImpl = container.get<AuthGrpcImpl>(AuthGrpcImpl);
     const proto = loadProtoDefinition("auth.proto");
     
     registerService(getGrpcServer(), proto, "auth.AuthService", {      
-      register: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
-      login: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
-      validateToken: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
-      refreshToken: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
-      getCurrentUser: (call: any, callback: any) => {
-        callback({
-          code: 12,
-          details: "Not implemented",
-        });
-      },
+      register: (call: any, callback: any) => authGrpcImpl.register(call, callback),
+      login: (call: any, callback: any) => authGrpcImpl.login(call, callback),
+      validateToken: (call: any, callback: any) => authGrpcImpl.validateToken(call, callback),
+      refreshToken: (call: any, callback: any) => authGrpcImpl.refreshToken(call, callback),
+      getCurrentUser: (call: any, callback: any) => authGrpcImpl.getCurrentUser(call, callback),
+      verifyUserExists: (call: any, callback: any) => authGrpcImpl.verifyUserExists(call, callback),
+      getRoleByName: (call: any, callback: any) => authGrpcImpl.getRoleByName(call, callback),
+      getAllRoles: (call: any, callback: any) => authGrpcImpl.getAllRoles(call, callback),
     });
     
     await startGrpcServer(grpcPort);

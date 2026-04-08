@@ -9,6 +9,7 @@ import { RoleRepository, IRoleRepository } from "../domain/repositories/role.rep
 import { AuthGrpcClient } from "../infrastructure/grpc/auth.grpc.client";
 import { EmployeeGrpcClient } from "../infrastructure/grpc/employee.grpc.client";
 import { AttendanceGrpcImpl } from "../infrastructure/grpc/attendance.grpc.impl";
+import { envConfig } from "../config/env.config";
 import {
   CreateAttendanceHandler,
   UpdateAttendanceHandler,
@@ -47,15 +48,15 @@ export function buildContainer(): Container {
     .toSelf()
     .inSingletonScope();
 
+  const authGrpcClient = new AuthGrpcClient(envConfig.authServiceUrl);
   container
     .bind<AuthGrpcClient>(AuthGrpcClient)
-    .toSelf()
-    .inSingletonScope();
+    .toConstantValue(authGrpcClient);
 
+  const employeeGrpcClient = new EmployeeGrpcClient(envConfig.employeeServiceUrl);
   container
     .bind<EmployeeGrpcClient>(EmployeeGrpcClient)
-    .toSelf()
-    .inSingletonScope();
+    .toConstantValue(employeeGrpcClient);
 
   container
     .bind<AttendanceGrpcImpl>(AttendanceGrpcImpl)
