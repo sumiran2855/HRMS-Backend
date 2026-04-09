@@ -2,11 +2,13 @@ import 'reflect-metadata';
 import { createApp } from './app';
 import { initializeDatabase } from './bootstrap/db.bootstrap';
 import { buildContainer } from './bootstrap/container.bootstrap';
+import { initializeDefaultRoles } from './bootstrap/role.initializer';
 import { initializeGrpcServer, startGrpcServer, shutdownGrpcServer, loadProtoDefinition, registerService, getGrpcServer } from './bootstrap/grpc.bootstrap';
 import { AuthGrpcImpl } from './infrastructure/grpc/auth.grpc.impl';
 import { EmployeeGrpcClient } from './infrastructure/grpc/employee.grpc.client';
 import { envConfig } from './config/env.config';
 import { Logger } from './shared/utils/logger.util';
+import { RoleService } from './application/services/role.service';
 
 const logger = new Logger('Server');
 
@@ -20,6 +22,11 @@ async function bootstrap() {
 
     const container = buildContainer();
     logger.info('✓ DI container initialized');
+
+    // Initialize default roles in database
+    const roleService = container.get<RoleService>(RoleService);
+    await initializeDefaultRoles(roleService);
+    logger.info('✓ Default roles initialized');
 
     // Initialize gRPC clients before creating proto definitions
     const employeeGrpcClient = container.get<EmployeeGrpcClient>(EmployeeGrpcClient);
