@@ -5,6 +5,7 @@ import { Logger } from "../utils/logger.util";
 const logger = new Logger("AuthMiddleware");
 
 export interface AuthRequest extends Request {
+  headers: any;
   user?: {
     userId: string;
     email: string;
@@ -21,7 +22,7 @@ export const authMiddleware = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = (req.headers as any).authorization;
+    const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       logger.warn("[AuthMiddleware] Missing or invalid Authorization header");
       res.status(401).json({
@@ -185,7 +186,7 @@ export const optionalAuth = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = (req.headers as any).authorization;
+    const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       next();
       return;
