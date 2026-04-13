@@ -11,7 +11,7 @@ export const tokenBlacklistCheckMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
     
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return next();

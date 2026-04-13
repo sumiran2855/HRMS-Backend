@@ -5,6 +5,7 @@ import { Logger } from "../utils/logger.util";
 const logger = new Logger("AuthMiddleware");
 
 export interface AuthRequest extends Request {
+  headers: any;
   user?: {
     userId: string;
     email: string;

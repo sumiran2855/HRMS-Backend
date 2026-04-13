@@ -16,7 +16,7 @@ export async function authMiddleware(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new AppError(ERROR_MESSAGES.UNAUTHORIZED, HTTP_STATUS.UNAUTHORIZED);
@@ -53,7 +53,7 @@ export async function optionalAuthMiddleware(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
@@ -78,7 +78,7 @@ export function createAuthMiddleware(jwtSvc: JwtService) {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const authHeader = req.headers.authorization;
+      const authHeader = (req.headers as any).authorization;
 
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         throw new AppError(
