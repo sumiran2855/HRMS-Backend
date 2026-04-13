@@ -36,7 +36,7 @@ export const envConfig: IEnvConfig = {
   mongodbUri: process.env.MONGODB_URI || "mongodb://localhost:27017/hrms-leave",
   grpcPort: parseInt(process.env.GRPC_PORT || "5004", 10),
   logLevel: process.env.LOG_LEVEL || "debug",
-  jwtSecret: process.env.JWT_SECRET || "secret",
+  jwtSecret: process.env.JWT_SECRET || "TESTING1D",
   corsOrigin: process.env.CORS_ORIGIN || "*",
   authServiceUrl: process.env.AUTH_SERVICE_GRPC_URL || "localhost:5001",
   employeeServiceUrl: process.env.EMPLOYEE_SERVICE_GRPC_URL || "localhost:5002",

@@ -31,7 +31,7 @@ export const authMiddleware = (
       return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key") as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "TESTING1D") as any;
 
     req.user = {
       userId: decoded.sub || decoded.userId,

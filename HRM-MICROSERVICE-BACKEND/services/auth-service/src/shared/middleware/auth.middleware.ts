@@ -33,7 +33,7 @@ export const authMiddleware = (
     }
 
     const token = authHeader.substring(7);
-    const secret = process.env.JWT_SECRET || "your-secret-key";
+    const secret = process.env.JWT_SECRET || "TESTING1D";
     let decoded: any;
     try {
       decoded = jwt.verify(token, secret, {
@@ -192,7 +192,7 @@ export const optionalAuth = (
     }
 
     const token = authHeader.substring(7);
-    const secret = process.env.JWT_SECRET || "your-secret-key";
+    const secret = process.env.JWT_SECRET || "TESTING1D";
 
     const decoded = jwt.verify(token, secret, {
       algorithms: ["HS256"],
