@@ -21,7 +21,7 @@ export const authMiddleware = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       logger.warn("[AuthMiddleware] Missing or invalid Authorization header");
       res.status(401).json({
@@ -185,7 +185,7 @@ export const optionalAuth = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       next();
       return;
