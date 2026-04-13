@@ -1,0 +1,1786 @@
+{
+  "info": {
+    "_postman_id": "437bfbb8-553d-4a43-8519-5336a048c2c8",
+    "name": "HRMS Microservices - RBAC Enabled",
+    "description": "API tests for Auth, Employee, and Attendance Services with Role-Based Access Control (RBAC)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23219798",
+    "_collection_link": "https://go.postman.co/collection/23219798-437bfbb8-553d-4a43-8519-5336a048c2c8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth Service - RBAC Flow",
+      "item": [
+        {
+          "name": "1. Register Admin User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@cisinlabs.com\",\n  \"password\": \"Test@123\",\n  \"username\": \"AdminCIS\",\n  \"fullName\": \"Admin\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Register SuperAdmin User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@cisinlabs.com\",\n  \"password\": \"Test@123\",\n  \"username\": \"SuperAdminCIS\",\n  \"fullName\": \"SuperAdmin\",\n  \"role\": \"superadmin\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Register HR User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@cisinlabs.com\",\n  \"password\": \"Test@123\",\n  \"username\": \"HrCIS\",\n  \"fullName\": \"Human Resource\",\n  \"role\": \"hr\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Register Manager User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@cisinlabs.com\",\n  \"password\": \"Test@123\",\n  \"username\": \"ManagerCIS\",\n  \"fullName\": \"Manager\",\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Register Employee User (Default)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@cisinlabs.com\",\n  \"password\": \"Test@123\",\n  \"username\": \"EmployeeCIS\",\n  \"fullName\": \"Employee\",\n  \"role\": \"employee\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Login as Admin - Get Token with Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('admin_token', jsonData.accessToken);",
+                  "    console.log('Admin token set with permissions:', jsonData.user.permissions);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@cisinlabs.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Login as HR - Get Token with Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('hr_token', jsonData.accessToken);",
+                  "    console.log('HR token set with permissions:', jsonData.user.permissions);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@cisinlabs.com\",\n  \"password\": \"Test@123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Login as Manager - Get Token with Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('manager_token', jsonData.accessToken);",
+                  "    console.log('Manager token set with permissions:', jsonData.user.permissions);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@hrms.com\",\n  \"password\": \"ManagerPass@123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Login as Employee - Get Token with Permissions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('employee_token', jsonData.accessToken);",
+                  "    console.log('Employee token set with permissions:', jsonData.user.permissions);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@hrms.com\",\n  \"password\": \"EmployeePass@123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Login as SuperAdmin - Get Token with Permissions Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('employee_token', jsonData.accessToken);",
+                  "    console.log('Employee token set with permissions:', jsonData.user.permissions);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@hrms.com\",\n  \"password\": \"EmployeePass@123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Validate Token - Check Role & Permissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTY4ZGEzZTEyYzk5YmQzMTY3NGY0ZWIiLCJlbWFpbCI6InNhbmRpcC5wYUBjaXNpbmxhYnMuY29tIiwidXNlcm5hbWUiOiJzYW5kZWVwMjYiLCJvcmdhbml6YXRpb25JZCI6ImRlZmF1bHQiLCJyb2xlIjoiZW1wbG95ZWUiLCJwZXJtaXNzaW9ucyI6WyJyZWFkOmVtcGxveWVlIiwiY3JlYXRlOmF0dGVuZGFuY2UiLCJyZWFkOmF0dGVuZGFuY2UiXSwiaWF0IjoxNzY4NDg1MzAzLCJleHAiOjE3Njg0ODg5MDMsInN1YiI6IjY5NjhkYTNlMTJjOTliZDMxNjc0ZjRlYiJ9.x4rO-hTPIadp3ktsHH3gq0goEJBbe92CGobW545dZdM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/auth/validate-token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "validate-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Get Current User - Verify Role Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/auth/current-user",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "current-user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. Test - Employee Tries to Logout (Protected Endpoint)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/auth/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Employee Service - RBAC Tests",
+      "item": [
+        {
+          "name": "1. Admin - Create Employee (Permission: create:employee)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"org-default\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@hrms.com\",\n  \"department\": \"IT\",\n  \"position\": \"Developer\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. HR - Create Employee (Permission: create:employee)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"org-default\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@hrms.com\",\n  \"department\": \"HR\",\n  \"position\": \"HR Manager\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Manager - Create Employee (Should FAIL - No Permission)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"org-default\",\n  \"firstName\": \"Bob\",\n  \"lastName\": \"Wilson\",\n  \"email\": \"bob.wilson@hrms.com\",\n  \"department\": \"Sales\",\n  \"position\": \"Sales Lead\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Employee - Create Employee (Should FAIL - No Permission)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"org-default\",\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Brown\",\n  \"email\": \"alice.brown@hrms.com\",\n  \"department\": \"Finance\",\n  \"position\": \"Accountant\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Admin - Get All Employees (Permission: read:employee)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Manager - Get All Employees (Permission: read:employee)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Employee - Get All Employees (Permission: read:employee)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Admin - Update Employee (Permission: update:employee)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Senior Developer\",\n  \"department\": \"Engineering\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees/employee_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees",
+                "employee_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. HR - Update Employee (Permission: update:employee)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Senior HR Manager\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees/employee_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees",
+                "employee_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Manager - Update Employee (Should FAIL - No Permission)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"New Position\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/employees/employee_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees",
+                "employee_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. Admin - Delete Employee (Permission: delete:employee)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees/employee_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees",
+                "employee_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. HR - Delete Employee (Should FAIL - No delete:employee Permission)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees/employee_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees",
+                "employee_id_here"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance Service - RBAC Tests",
+      "item": [
+        {
+          "name": "1. Employee - Create Attendance (Permission: create:attendance)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTZlMDJkYTI0YzI4YjQ3N2NkMzQzM2MiLCJlbWFpbCI6ImFkbWluQGNpc2lubGFicy5jb20iLCJ1c2VybmFtZSI6IkFkbWluQ0lTIiwib3JnYW5pemF0aW9uSWQiOiJkZWZhdWx0Iiwicm9sZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiY3JlYXRlOmVtcGxveWVlIiwicmVhZDplbXBsb3llZSIsInVwZGF0ZTplbXBsb3llZSIsImRlbGV0ZTplbXBsb3llZSIsImNyZWF0ZTphdHRlbmRhbmNlIiwicmVhZDphdHRlbmRhbmNlIiwidXBkYXRlOmF0dGVuZGFuY2UiLCJhcHByb3ZlOmF0dGVuZGFuY2UiLCJjcmVhdGU6dXNlciIsInJlYWQ6dXNlciIsInVwZGF0ZTp1c2VyIiwiZGVsZXRlOnVzZXIiLCJtYW5hZ2U6cm9sZXMiLCJ2aWV3OnJlcG9ydHMiLCJleHBvcnQ6ZGF0YSJdLCJpYXQiOjE3Njg4MzA2NDYsImV4cCI6MTc2ODgzNDI0Niwic3ViIjoiNjk2ZTAyZGEyNGMyOGI0NzdjZDM0MzNjIn0.QSwI9vYZNUVRc8EzzxlEJUGs5VAT5MHzKxR0GUm_Nqs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"CIS-2472\",\n  \"employeeId\": \"696e1cb4b6df792aa191225845654\",\n  \"date\": \"2026-01-19\",\n  \"status\": \"absent\",\n//   \"leaveType\": \"sick\",\n  \"checkInTime\": \"2026-01-19T09:00:00.000Z\",\n  \"checkOutTime\": \"2026-01-19T19:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/api/attendance",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "api",
+                "attendance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Manager - Create Attendance (Permission: create:attendance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"org-default\",\n  \"employeeId\": \"employee_id_here\",\n  \"date\": \"2026-01-15\",\n  \"status\": \"Present\",\n  \"checkInTime\": \"09:00:00\",\n  \"checkOutTime\": \"17:30:00\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. HR - Create Attendance (Permission: create:attendance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organizationId\": \"org-default\",\n  \"employeeId\": \"employee_id_here\",\n  \"date\": \"2026-01-15\",\n  \"status\": \"Present\",\n  \"checkInTime\": \"09:15:00\",\n  \"checkOutTime\": \"17:00:00\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Admin - Get All Attendance (Permission: read:attendance)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/attendance?organizationId=org-default&page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "org-default"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. HR - Get All Attendance (Permission: read:attendance)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/attendance?organizationId=org-default&page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "org-default"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. Manager - Get All Attendance (Permission: read:attendance)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/attendance?organizationId=org-default&page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "org-default"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Employee - Get All Attendance (Permission: read:attendance)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/attendance?organizationId=org-default&page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "org-default"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. HR - Update Attendance (Permission: update:attendance)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Late\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. Manager - Update Attendance (Permission: update:attendance)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Absent\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Employee - Update Attendance (Should FAIL - No Permission)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Present\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11. HR - Approve Attendance (Permission: approve:attendance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "12. Manager - Approve Attendance (Permission: approve:attendance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "13. Employee - Approve Attendance (Should FAIL - No Permission)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "14. Admin - Delete Attendance (Permission: delete:attendance)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/attendance/attendance_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "attendance_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "15. Get Attendance by Date Range (Permission: read:attendance)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3003/attendance/date-range?organizationId=org-default&startDate=2026-01-01&endDate=2026-01-31",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3003",
+              "path": [
+                "attendance",
+                "date-range"
+              ],
+              "query": [
+                {
+                  "key": "organizationId",
+                  "value": "org-default"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-01-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Leave Service - RBAC Tests",
+      "item": [
+        {
+          "name": "1. Employee - Request Leave (Permission: create:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"employee_id_here\",\n  \"leaveType\": \"Paid Leave\",\n  \"startDate\": \"2026-02-01\",\n  \"endDate\": \"2026-02-05\",\n  \"numberOfDays\": 5,\n  \"reason\": \"Personal work\",\n  \"attachmentUrl\": \"https://example.com/attachment.pdf\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/leaves",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Manager - Request Leave (Permission: create:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"employee_id_here\",\n  \"leaveType\": \"Paid Leave\",\n  \"startDate\": \"2026-02-10\",\n  \"endDate\": \"2026-02-12\",\n  \"numberOfDays\": 3,\n  \"reason\": \"Medical appointment\",\n  \"attachmentUrl\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/leaves",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. HR - Get All Leaves (Permission: read:leave)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3004/leaves?page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. Manager - Get All Leaves (Permission: read:leave)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3004/leaves?page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5. Employee - Get Leave by Employee ID (Permission: read:leave)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3004/leaves/employee/employee_id_here?page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves",
+                "employee",
+                "employee_id_here"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. HR - Approve Leave (Permission: approve:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"approverComments\": \"Approved as per policy\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/leaves/leave_id_here/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves",
+                "leave_id_here",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. Manager - Approve Leave (Permission: approve:leave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"approverComments\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/leaves/leave_id_here/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves",
+                "leave_id_here",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8. Employee - Approve Leave (Should FAIL - No Permission)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"approverComments\": \"Approved\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/leaves/leave_id_here/approve",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves",
+                "leave_id_here",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9. HR - Update Leave (Permission: update:leave)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{hr_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveType\": \"Casual Leave\",\n  \"reason\": \"Updated reason\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/leaves/leave_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves",
+                "leave_id_here"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "10. Admin - Delete Leave (Permission: delete:leave)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3004/leaves/leave_id_here",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3004",
+              "path": [
+                "leaves",
+                "leave_id_here"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authorization - Negative Tests",
+      "item": [
+        {
+          "name": "1. No Token - Should Get 401 Unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. Invalid Token - Should Get 401 Unauthorized",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid_token_here"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. Expired Token - Should Get 401 Token Expired",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3002/employees",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3002",
+              "path": [
+                "employees"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hr_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "manager_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employee_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "type": "string"
+    }
+  ]
+}

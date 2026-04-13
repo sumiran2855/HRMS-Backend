@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package employee;
+
+
+service EmployeeService {
+  
+  rpc CreateEmployee (CreateEmployeeRequest) returns (EmployeeResponse) {}
+  
+  rpc GetEmployeeById (GetEmployeeByIdRequest) returns (EmployeeResponse) {}
+  
+  rpc GetAllEmployees (GetAllEmployeesRequest) returns (EmployeeListResponse) {}
+  
+  rpc UpdateEmployee (UpdateEmployeeRequest) returns (EmployeeResponse) {}
+  
+  rpc DeleteEmployee (DeleteEmployeeRequest) returns (DeleteEmployeeResponse) {}
+  
+  rpc GetEmployeeByEmail (GetEmployeeByEmailRequest) returns (EmployeeResponse) {}
+}
+
+message CreateEmployeeRequest {
+  string firstName = 1;
+  string lastName = 2;
+  string email = 3;
+  string department = 4;
+  string position = 5;
+  string phoneNumber = 6;
+}
+
+message GetEmployeeByIdRequest {
+  string id = 1;
+}
+
+message GetAllEmployeesRequest {
+  map<string, string> filter = 1;
+}
+
+message UpdateEmployeeRequest {
+  string id = 1;
+  map<string, string> data = 2;
+}
+
+message DeleteEmployeeRequest {
+  string id = 1;
+}
+
+message GetEmployeeByEmailRequest {
+  string email = 1;
+}
+
+message EmployeeResponse {
+  bool success = 1;
+  string message = 2;
+  EmployeeData data = 3;
+  string error = 4;
+}
+
+message EmployeeListResponse {
+  bool success = 1;
+  string message = 2;
+  repeated EmployeeData data = 3;
+  string error = 4;
+}
+
+message DeleteEmployeeResponse {
+  bool success = 1;
+  string message = 2;
+  bool deleted = 3;
+  string error = 4;
+}
+
+message EmployeeData {
+  string id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+  string department = 5;
+  string position = 6;
+  string phoneNumber = 7;
+  int64 createdAt = 8;
+  int64 updatedAt = 9;
+}

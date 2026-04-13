@@ -1,0 +1,18 @@
+{
+  "name": "hrm-microservice-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root directory for HRMS microservices",
+   "scripts": {
+    "auth:dev": "cd services/auth-service && npm run dev",
+    "auth:build": "cd services/auth-service && npm run build",
+    "employee:dev": "cd services/employee-service && npm run dev",
+    "employee:build": "cd services/employee-service && npm run build",
+    "attendance:dev": "cd services/attendance-service && npm run dev",
+    "attendance:build": "cd services/attendance-service && npm run build",
+    "leave:dev": "cd services/leave-service && npm run dev",
+    "leave:build": "cd services/leave-service && npm run build"
+  },
+  "author": "dev.sandeep",
+  "license": "ISC"
+}

@@ -1,0 +1,222 @@
+syntax = "proto3";
+
+package leave;
+
+service LeaveService {
+  rpc RequestLeave(CreateLeaveRequest) returns (LeaveResponse) {}
+  rpc ApproveLeave(ApproveLeaveRequest) returns (LeaveResponse) {}
+  rpc RejectLeave(RejectLeaveRequest) returns (LeaveResponse) {}
+  rpc CancelLeave(CancelLeaveRequest) returns (LeaveResponse) {}
+  rpc GetLeaveById(GetLeaveByIdRequest) returns (LeaveResponse) {}
+  rpc GetLeavesByEmployeeId(GetLeavesByEmployeeIdRequest) returns (LeaveListResponse) {}
+  rpc GetAllLeaves(GetAllLeavesRequest) returns (LeaveListResponse) {}
+  rpc GetLeavesByStatus(GetLeavesByStatusRequest) returns (LeaveListResponse) {}
+  rpc GetLeaveBalance(GetLeaveBalanceRequest) returns (LeaveBalanceResponse) {}
+  rpc InitializeLeaveBalance(InitializeLeaveBalanceRequest) returns (LeaveBalanceResponse) {}
+  rpc GetLeaveTypes(GetLeaveTypesRequest) returns (LeaveTypeListResponse) {}
+  rpc CreateLeaveType(CreateLeaveTypeRequest) returns (LeaveTypeResponse) {}
+}
+
+enum LeaveStatus {
+  PENDING = 0;
+  APPROVED = 1;
+  REJECTED = 2;
+  CANCELLED = 3;
+}
+
+enum LeaveType {
+  CASUAL = 0;
+  SICK = 1;
+  EARNED = 2;
+  MATERNITY = 3;
+  PATERNITY = 4;
+  UNPAID = 5;
+  OTHER = 6;
+}
+
+message LeaveData {
+  string id = 1;
+  string employeeId = 2;
+  string leaveType = 3;
+  string startDate = 4;
+  string endDate = 5;
+  int32 numberOfDays = 6;
+  string reason = 7;
+  string attachmentUrl = 8;
+  LeaveStatus status = 9;
+  string approvedBy = 10;
+  string rejectionReason = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+}
+
+message CreateLeaveRequest {
+  string employeeId = 1;
+  string leaveType = 2;
+  string startDate = 3;
+  string endDate = 4;
+  int32 numberOfDays = 5;
+  string reason = 6;
+  string attachmentUrl = 7;
+}
+
+message ApproveLeaveRequest {
+  string leaveId = 1;
+  string approvedBy = 2;
+}
+
+message RejectLeaveRequest {
+  string leaveId = 1;
+  string rejectionReason = 2;
+}
+
+message CancelLeaveRequest {
+  string leaveId = 1;
+}
+
+message GetLeaveByIdRequest {
+  string leaveId = 1;
+}
+
+message GetLeavesByEmployeeIdRequest {
+  string employeeId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message GetAllLeavesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message GetLeavesByStatusRequest {
+  string status = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message LeaveResponse {
+  string id = 1;
+  string employeeId = 2;
+  string leaveType = 3;
+  string startDate = 4;
+  string endDate = 5;
+  int32 numberOfDays = 6;
+  string reason = 7;
+  string attachmentUrl = 8;
+  string status = 9;
+  string approvedBy = 10;
+  string rejectionReason = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+}
+
+message LeaveListResponse {
+  repeated LeaveResponse leaves = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message LeaveBalanceData {
+  string employeeId = 1;
+  int32 year = 2;
+  int32 casual = 3;
+  int32 casualUsed = 4;
+  int32 casualRemaining = 5;
+  int32 sick = 6;
+  int32 sickUsed = 7;
+  int32 sickRemaining = 8;
+  int32 earned = 9;
+  int32 earnedUsed = 10;
+  int32 earnedRemaining = 11;
+  int32 maternity = 12;
+  int32 maternityUsed = 13;
+  int32 maternityRemaining = 14;
+  int32 paternity = 15;
+  int32 paternityUsed = 16;
+  int32 paternityRemaining = 17;
+  int32 unpaid = 18;
+  int32 unpaidUsed = 19;
+  int32 other = 20;
+  int32 otherUsed = 21;
+  int32 otherRemaining = 22;
+}
+
+message GetLeaveBalanceRequest {
+  string employeeId = 1;
+  int32 year = 2;
+}
+
+message InitializeLeaveBalanceRequest {
+  string employeeId = 1;
+  int32 year = 2;
+}
+
+message LeaveBalanceResponse {
+  string employeeId = 1;
+  int32 year = 2;
+  int32 casual = 3;
+  int32 casualUsed = 4;
+  int32 casualRemaining = 5;
+  int32 sick = 6;
+  int32 sickUsed = 7;
+  int32 sickRemaining = 8;
+  int32 earned = 9;
+  int32 earnedUsed = 10;
+  int32 earnedRemaining = 11;
+  int32 maternity = 12;
+  int32 maternityUsed = 13;
+  int32 maternityRemaining = 14;
+  int32 paternity = 15;
+  int32 paternityUsed = 16;
+  int32 paternityRemaining = 17;
+  int32 unpaid = 18;
+  int32 unpaidUsed = 19;
+  int32 other = 20;
+  int32 otherUsed = 21;
+  int32 otherRemaining = 22;
+}
+
+message LeaveTypeData {
+  string id = 1;
+  string name = 2;
+  int32 maxDaysPerYear = 3;
+  int32 carryForwardDays = 4;
+  bool requiresApproval = 5;
+  bool requiresAttachment = 6;
+  string description = 7;
+  bool isActive = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}
+
+message GetLeaveTypesRequest {
+}
+
+message CreateLeaveTypeRequest {
+  string name = 1;
+  int32 maxDaysPerYear = 2;
+  int32 carryForwardDays = 3;
+  bool requiresApproval = 4;
+  bool requiresAttachment = 5;
+  string description = 6;
+}
+
+message LeaveTypeResponse {
+  string id = 1;
+  string name = 2;
+  int32 maxDaysPerYear = 3;
+  int32 carryForwardDays = 4;
+  bool requiresApproval = 5;
+  bool requiresAttachment = 6;
+  string description = 7;
+  bool isActive = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}
+
+message LeaveTypeListResponse {
+  repeated LeaveTypeResponse leaveTypes = 1;
+  int32 total = 2;
+}

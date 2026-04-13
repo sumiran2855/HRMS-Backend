@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package attendance;
+
+service AttendanceService {
+  rpc CreateAttendance(CreateAttendanceRequest) returns (AttendanceResponse) {}
+  rpc GetAttendanceById(GetAttendanceByIdRequest) returns (AttendanceResponse) {}
+  rpc GetAttendanceByDateRange(GetAttendanceByDateRangeRequest) returns (AttendanceListResponse) {}
+  rpc UpdateAttendance(UpdateAttendanceRequest) returns (AttendanceResponse) {}
+  rpc DeleteAttendance(DeleteAttendanceRequest) returns (DeleteAttendanceResponse) {}
+  rpc ApproveAttendance(ApproveAttendanceRequest) returns (AttendanceResponse) {}
+  rpc GetAttendanceSummary(GetAttendanceSummaryRequest) returns (AttendanceSummaryResponse) {}
+  rpc BulkUpsertAttendance(BulkUpsertAttendanceRequest) returns (AttendanceListResponse) {}
+  rpc GetPendingApprovals(GetPendingApprovalsRequest) returns (AttendanceListResponse) {}
+}
+
+
+enum AttendanceStatus {
+  PRESENT = 0;
+  ABSENT = 1;
+  LEAVE = 2;
+  HALF_DAY = 3;
+  LATE = 4;
+}
+
+enum LeaveType {
+  SICK = 0;
+  CASUAL = 1;
+  EARNED = 2;
+  UNPAID = 3;
+  MATERNITY = 4;
+  OTHER = 5;
+}
+
+
+message AttendanceData {
+  string id = 1;
+  string employeeId = 2;
+  string organizationId = 3;
+  string date = 4;
+  string checkInTime = 5;
+  string checkOutTime = 6;
+  AttendanceStatus status = 7;
+  LeaveType leaveType = 8;
+  string remarks = 9;
+  bool isApproved = 10;
+  string approvedBy = 11;
+  string approvedAt = 12;
+  double workHours = 13;
+  double overtime = 14;
+  string createdAt = 15;
+  string updatedAt = 16;
+  string createdBy = 17;
+}
+
+message CreateAttendanceRequest {
+  string employeeId = 1;
+  string organizationId = 2;
+  string date = 3;
+  string checkInTime = 4;
+  string checkOutTime = 5;
+  AttendanceStatus status = 6;
+  LeaveType leaveType = 7;
+  string remarks = 8;
+  string createdBy = 9;
+}
+
+message GetAttendanceByIdRequest {
+  string id = 1;
+  string organizationId = 2;
+}
+
+message GetAttendanceByDateRangeRequest {
+  string organizationId = 1;
+  string employeeId = 2;
+  string startDate = 3;
+  string endDate = 4;
+  int32 page = 5;
+  int32 limit = 6;
+}
+
+message UpdateAttendanceRequest {
+  string id = 1;
+  string organizationId = 2;
+  string checkInTime = 3;
+  string checkOutTime = 4;
+  AttendanceStatus status = 5;
+  LeaveType leaveType = 6;
+  string remarks = 7;
+  double workHours = 8;
+  double overtime = 9;
+}
+
+message DeleteAttendanceRequest {
+  string id = 1;
+  string organizationId = 2;
+}
+
+message DeleteAttendanceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ApproveAttendanceRequest {
+  string id = 1;
+  string organizationId = 2;
+  string approvedBy = 3;
+}
+
+message GetAttendanceSummaryRequest {
+  string employeeId = 1;
+  string organizationId = 2;
+  string startDate = 3;
+  string endDate = 4;
+}
+
+message AttendanceSummary {
+  int32 totalPresent = 1;
+  int32 totalAbsent = 2;
+  int32 totalLeave = 3;
+  int32 totalLate = 4;
+  int32 totalHalfDay = 5;
+  double workingHours = 6;
+  double overtimeHours = 7;
+}
+
+message AttendanceSummaryResponse {
+  bool success = 1;
+  string message = 2;
+  AttendanceSummary data = 3;
+}
+
+message BulkUpsertAttendanceRequest {
+  repeated AttendanceData attendances = 1;
+  string organizationId = 2;
+}
+
+message GetPendingApprovalsRequest {
+  string organizationId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message AttendanceResponse {
+  bool success = 1;
+  string message = 2;
+  AttendanceData data = 3;
+  string statusCode = 4;
+}
+
+message AttendanceListResponse {
+  bool success = 1;
+  string message = 2;
+  repeated AttendanceData data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  string statusCode = 7;
+}
