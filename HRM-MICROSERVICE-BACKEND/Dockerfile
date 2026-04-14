@@ -4,7 +4,7 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy root tsconfig and service files
-COPY services/employee-service/tsconfig.base.json ./
+COPY tsconfig.base.json ./
 COPY services/employee-service/tsconfig.json ./tsconfig.json
 
 # Copy package files
