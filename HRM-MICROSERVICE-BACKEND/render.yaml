@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: employee-service
+    runtime: node
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: cd services/employee-service && mkdir -p proto && cp -r ../proto/*.proto proto/ && npm run build
+    startCommand: cd services/employee-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      - key: GRPC_EMPLOYEE_PORT
+        value: 5002
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
