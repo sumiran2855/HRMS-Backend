@@ -5,9 +5,9 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "prebuild": "npm install",
+    "prebuild": "npm install --include=dev",
     "build": "tsc",
-    "prestart": "npm install && npm run build",
+    "prestart": "npm install --include=dev && npm run build",
     "start": "node dist/server.js",
     "test": "jest",
     "test:watch": "jest --watch"
