@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: employee-service
+    runtime: node
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: cd services/employee-service && npm install && npm run build
+    startCommand: cd services/employee-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
