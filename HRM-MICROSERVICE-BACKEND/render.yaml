@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     branch: main
-    buildCommand: cd services/employee-service && npm install --include=dev && npm run build
+    buildCommand: cd services/employee-service && NODE_ENV=development npm install && npm run build
     startCommand: cd services/employee-service && npm start
     envVars:
       - key: NODE_ENV
